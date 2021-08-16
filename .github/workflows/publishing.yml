@@ -1,0 +1,68 @@
+name: Publishing the action to the marketplace
+
+on:   
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+  workflow_dispatch:
+    
+    
+jobs:
+  test-local-action:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v2
+
+      - uses: ./
+        name: Load used actions
+        with: 
+          PAT: ${{ secrets.GITHUB_TOKEN }}
+        id: load-actions
+      - shell: pwsh        
+        run: |
+         Write-Host "Found actions [${{ steps.load-actions.outputs.actions }}]"
+         $content = ${{ steps.load-actions.outputs.actions }}
+         New-Item -Path 'actions.json' -Value $content -Force | Out-Null
+         $actions = $content | ConvertFrom-Json
+         if ($actions.Length -le 0) {
+            throw "No actions found"
+         } 
+         else {
+            Write-Host "Found [$($actions.Length)] actions"
+         }
+            
+      - name: Upload result file as artefact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: actions
+          path: actions.json
+    
+  publish:
+    needs: test-local-action
+    if: never()
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Get tag value
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+        
+      - name: Use tag
+        run: echo ${{ steps.tag.outputs.tag }}
+
+      - uses: actions/create-release@v2
+        id: create_release
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      # todo: figure out how this works with an action :-)
+      #- uses: actions/publish-release-asset@v2
+        #with:
+          #upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          #asset_path: ./my-artifact.zip
+          #asset_name: my-artifact.zip
+          #asset_content_type: application/zip
