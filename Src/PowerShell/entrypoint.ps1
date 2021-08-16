@@ -33,24 +33,24 @@ function main {
     New-Item -Path $fileName -Value $jsonObject -Force | Out-Null
     $content = Get-Content $fileName
     Write-Host "Written [$($content.Length)] characters to the output file [$fileName]"
+
+    Write-Output ::set-output name=actions::"$jsonObject"
 }
 
 try {
     # always run in the correct location, where our scripts are located:
     Set-Location $PSScriptRoot
-    
+
     # call main script:
     main
 
-    $b = $LASTEXITCODE
-    # return the container with the last exit code:
-    Write-Host "Returning with last exit code: [$b]"
-    exit $b
+    # return the container with the exit code = Ok:    
+    exit 0
 }
 catch {
     # return the container with the last exit code: 
-    $b = $LASTEXITCODE
     Write-Error "Error loading the actions:"
     Write-Error $_
+    # return the container with an erroneous exit code:
     exit 1
 }
