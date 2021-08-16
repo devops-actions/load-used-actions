@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
-      
+
       - uses: ./
         name: Load used actions
         with: 
@@ -21,7 +21,7 @@ jobs:
          $content = ${{ steps.load-actions.outputs.actions }}
          New-Item -Path 'actions.json' -Value $content -Force | Out-Null
          $actions = $content | ConvertFrom-Json
-         if $($actions.)length) -le 0 {
+         if ($actions.)length) -le 0) {
             throw "No actions found"
          }
          else {
