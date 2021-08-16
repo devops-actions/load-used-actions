@@ -21,9 +21,9 @@ jobs:
          $content = ${{ steps.load-actions.outputs.actions }}
          New-Item -Path 'actions.json' -Value $content -Force | Out-Null
          $actions = $content | ConvertFrom-Json
-         if ($actions.Length) -le 0) {
+         if ($actions.Length -le 0) {
             throw "No actions found"
-         }
+         } 
          else {
             Write-Host "Found [$($actions.Length)] actions"
          }
