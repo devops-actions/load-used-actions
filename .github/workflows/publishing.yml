@@ -40,7 +40,6 @@ jobs:
     
   publish:
     needs: test-local-action
-    if: never()
     runs-on: ubuntu-latest
     steps:
       
