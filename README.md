@@ -17,8 +17,8 @@ This example shows how to use the action to get a json file with all the used ac
 
 |#|Name|Description|
 |---|---|---|
-|1|Run this action to load all actions used in an organization|
-|2|Output the json value from the output of the action in step 1|
+|1|Run this action to load all actions used in an organization. Note the id of this step|
+|2|Output the json value from the output of the action in step 1, by using the id of step 1 in `${{ steps.<step id>.outputs.actions }}`|
 |3|Upload the json file as an artefact|
 
 
@@ -34,8 +34,7 @@ jobs:
         id: load-actions
 
       - shell: pwsh        
-        run: |
-         Write-Host "Found actions [${{ steps.load-actions.outputs.actions }}]"
+        run: |         
          $content = ${{ steps.load-actions.outputs.actions }}
          New-Item -Path 'actions.json' -Value $content -Force | Out-Null
             
