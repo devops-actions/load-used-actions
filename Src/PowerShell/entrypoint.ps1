@@ -11,11 +11,11 @@ function main {
     }
 
     if ($null -eq $PAT -or "" -eq $PAT) {
-        Write-Host "Using default for PAT: [GITHUB_TOKEN] with length: [$($env:GITHUB_TOKEN).Length)]"
+        Write-Host "Using default for PAT: [GITHUB_TOKEN] with length: [$($env:GITHUB_TOKEN.Length)]"
         $PAT = $($env:GITHUB_TOKEN)
     }
 
-    $actions = (.\$PSScriptRoot\load-used-actions.ps1 -orgName $organization -PAT $PAT)
+    $actions = (.load-used-actions.ps1 -orgName $organization -PAT $PAT)
 
     # wite the file outside of the container so we can pick it up
     Write-Host "Found [$($actions.Count)] actions "
@@ -39,7 +39,8 @@ try {
 catch {
     # return the container with the last exit code: 
     $b = $LASTEXITCODE
-    Write-Error "Error loading actions: [$($_)]"	
-    Write-Host "Returning with last exit code: $b"
-    exit $b
+    Write-Error "Error loading actions:"
+    Write-Error $_
+    Write-Host "Returning with last exit code: [$b]"
+    exit 1
 }
