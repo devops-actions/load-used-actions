@@ -4,7 +4,18 @@ param (
 )
 
 function main {
-    $actions = (.\src\load-used-actions.ps1 -orgName $organization -PAT $PAT)
+
+    if ($null -eq $organization -or "" -eq $organization) {
+        Write-Host "Using default for organization: [$($env:GITHUB_REPOSITORY_OWNER)]"
+        $organization = $($env:GITHUB_REPOSITORY_OWNER)
+    }
+
+    if ($null -eq $PAT -or "" -eq $PAT) {
+        Write-Host "Using default for PAT: [GITHUB_TOKEN]"
+        $PAT = $($env:GITHUB_TOKEN)
+    }
+
+    $actions = (.\load-used-actions.ps1 -orgName $organization -PAT $PAT)
 
     # wite the file outside of the container so we can pick it up
     Write-Host "Found [$($actions.Count)] actions "
