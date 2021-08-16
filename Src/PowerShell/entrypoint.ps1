@@ -12,6 +12,7 @@ function main {
 
     if ($null -eq $PAT -or "" -eq $PAT) {
         Write-Error "No value given for input PAT: Use at least [GITHUB_TOKEN]"
+        throw
     }
 
     $actions = (load-used-actions.ps1 -orgName $organization -PAT $PAT)
@@ -38,8 +39,7 @@ try {
 catch {
     # return the container with the last exit code: 
     $b = $LASTEXITCODE
-    Write-Error "Error loading actions:"
+    Write-Error "Error loading the actions:"
     Write-Error $_
-    Write-Host "Returning with last exit code: [$b]"
     exit 1
 }
