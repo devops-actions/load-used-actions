@@ -23,9 +23,6 @@ function main {
         throw
     }
 
-    Set-Location $PSScriptRoot
-    Get-LocationInfo
-
     $actions = (.\load-used-actions.ps1 -orgName $organization -PAT $PAT)
 
     # wite the file outside of the container so we can pick it up
@@ -39,6 +36,9 @@ function main {
 }
 
 try {
+    # always run in the correct location, where our scripts are located:
+    Set-Location $PSScriptRoot
+    
     # call main script:
     main
 

@@ -4,8 +4,7 @@ param (
     [string] $orgName,
     [string] $userName,
     [string] $PAT,
-    [string] $marketplaceRepo,
-    [string] $userEmail
+    [string] $marketplaceRepo
 )
 
 # pull in central calls library
@@ -15,9 +14,13 @@ param (
 Write-Host "We're running with these parameters:"
 Write-Host " PAT.Length: [$($PAT.Length)]"
 Write-Host " orgName: [$orgName]"
+
+if ($null -eq $userName -or "" -eq $userName) {
+    $userName = $env:GITHUB_ACTOR
+}
+
 Write-Host " userName: [$userName]"
 Write-Host " marketplaceRepo: [$marketplaceRepo]"
-Write-Host " userEmail: [$userEmail]"
 
 function  GetActionsFromWorkflow {
     param (
