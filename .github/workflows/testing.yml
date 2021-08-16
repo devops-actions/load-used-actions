@@ -8,6 +8,8 @@ jobs:
   load-all-used-actions:
     runs-on: ubuntu-latest
     steps: 
+      - uses: actions/checkout@v2
+      
       - uses: ./
         name: Load used actions
         with: 
