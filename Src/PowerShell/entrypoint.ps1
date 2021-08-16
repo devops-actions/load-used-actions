@@ -28,7 +28,7 @@ function main {
     # wite the file outside of the container so we can pick it up
     Write-Host "Found [$($actions.Count)] actions "
     #Write-Verbose $actions | ConvertTo-Json -Depth 10
-    $jsonObject = ($actions | ConvertTo-Json -Depth 10)
+    $jsonObject = ($actions | ConvertTo-Json -Depth 10 -Compress)
     $fileName = "summarized-actions.json"
     New-Item -Path $fileName -Value $jsonObject -Force | Out-Null
     $content = Get-Content $fileName
