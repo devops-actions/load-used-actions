@@ -10,7 +10,7 @@ inputs:
     required: false
   PAT:
     description: 'Personal access token to use for analysis. Leaving this empty will use the default GITHUB_TOKEN that could have limited access rights'
-    required: false 
+    required: true 
 runs:
   using: 'docker'
   image: 'Dockerfile'

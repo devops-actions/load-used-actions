@@ -11,11 +11,10 @@ function main {
     }
 
     if ($null -eq $PAT -or "" -eq $PAT) {
-        Write-Host "Using default for PAT: [GITHUB_TOKEN] with length: [$($env:GITHUB_TOKEN.Length)]"
-        $PAT = $($env:GITHUB_TOKEN)
+        Write-Error "No value given for input PAT: Use at least [GITHUB_TOKEN]"
     }
 
-    $actions = (.load-used-actions.ps1 -orgName $organization -PAT $PAT)
+    $actions = (load-used-actions.ps1 -orgName $organization -PAT $PAT)
 
     # wite the file outside of the container so we can pick it up
     Write-Host "Found [$($actions.Count)] actions "
