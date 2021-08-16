@@ -3,6 +3,14 @@ param (
     [string] $PAT
 )
 
+function Get-LocationInfo {
+    Write-Host "Where are we? [$pwd]"
+
+    ForEach ($file in Get-ChildItem) {
+        Write-Host "- $($file.Name)"
+    }
+}
+
 function main {
 
     if ($null -eq $organization -or "" -eq $organization) {
@@ -15,7 +23,10 @@ function main {
         throw
     }
 
-    $actions = (load-used-actions.ps1 -orgName $organization -PAT $PAT)
+    Set-Location $PSScriptRoot
+    Get-LocationInfo
+
+    $actions = (.\load-used-actions.ps1 -orgName $organization -PAT $PAT)
 
     # wite the file outside of the container so we can pick it up
     Write-Host "Found [$($actions.Count)] actions "
