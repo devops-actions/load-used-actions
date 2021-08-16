@@ -1,0 +1,24 @@
+on: 
+  push:
+
+  workflow_dispatch:
+    
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: rajbos/actions-testing-grounds@main
+        name: defaults
+      
+      - uses: rajbos/actions-testing-grounds@main
+        name: value for parameter 4
+        with: 
+          variable4: testing4
+
+      - uses: rajbos/actions-testing-grounds@main
+        name: values for all parameter
+        with: 
+          variable1: testing1
+          variable2: testing2
+          variable3: testing3
+          variable4: testing4

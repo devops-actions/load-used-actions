@@ -1,0 +1,19 @@
+# action.yml
+name: 'Load used actions'
+description: 'Load an overview of all used actions in a GitHub Organization (or user account)'
+branding:
+  icon : alert-circle
+  color: blue
+inputs:
+  organization:
+    description: 'Slug of the organization to analyze. Leave empty for current organization'
+    required: false
+  PAT:
+    description: 'Personal access token to use for analysis. Leaving this empty will use the default GITHUB_TOKEN that could have limited access rights'
+    required: false 
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args: 
+    - '${{ inputs.organization }}' 
+    - '${{ inputs.PAT }}' 
