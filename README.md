@@ -1,7 +1,43 @@
 # github-action-load-used-actions
 Load used actions from an entire organization, by calling the REST API with a Personal Access Token and loop through all workflows in all repositories in the user account or organization.
 
-## Usage
+The output is stored with the name actions, which can be retrieved in another action with `${{ steps.<step id>.outputs.actions }}`.
+
+## Inputs
+|Name|Description|
+|---|---|
+|organization|The name of the organization to run on.|
+|PAT|The Personal Access Token to use for the API call.|
+
+## Outputs
+actions: a compressed json string with all the actions used in the workflows in the organization. The json is in the format:
+``` json
+[
+    "actionLink": "actions/checkout",
+    "count": 50,
+    "workflows": [
+        {
+            "repo": "rajbos/actions-marketplace",
+            "workflowFileName: "build-image.yml"
+        },
+        { etc }
+    ]
+]
+```
+Properties:
+|Name|Description|
+|----|-----------|
+|actionLink|The link to the action used in the workflow|
+|count|The number of times the action was used in the workflow|
+|workflows|An array of workflows that used the action|
+
+The workflow object has the following properties:
+|Name|Description|
+|----|-----------|
+|repo|The name of the repository that uses the action|
+|workflowFileName|The name of the workflow file that was found in the directory `.github/workflows/`|
+
+## Example usage
 Minimal uses expression to use this action:
 
 ``` yaml
