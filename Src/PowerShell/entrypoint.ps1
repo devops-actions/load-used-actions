@@ -34,7 +34,7 @@ function main {
     $content = Get-Content $fileName
     Write-Host "Written [$($content.Length)] characters to the output file [$fileName]"
 
-    Write-Output ::set-output name=actions::"$jsonObject"
+    echo ::set-output name=actions::"$jsonObject"
 }
 
 try {
