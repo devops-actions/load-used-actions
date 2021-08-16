@@ -14,9 +14,7 @@ inputs:
     required: true 
 outputs:
   actions:
-    description: 'List of all actions used in the organization'
-  test:
-    description: 'test value'    
+    description: 'List of all actions used in the organization'  
 runs:
   using: 'docker'
   image: 'Dockerfile'

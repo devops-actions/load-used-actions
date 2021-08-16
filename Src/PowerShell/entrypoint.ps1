@@ -29,13 +29,9 @@ function main {
     Write-Host "Found [$($actions.Count)] actions "
     #Write-Verbose $actions | ConvertTo-Json -Depth 10
     $jsonObject = ($actions | ConvertTo-Json -Depth 10 -Compress)
-    $fileName = "summarized-actions.json"
-    New-Item -Path $fileName -Value $jsonObject -Force | Out-Null
-    $content = Get-Content $fileName
-    Write-Host "Written [$($content.Length)] characters to the output file [$fileName]"
-
-    Write-Output "::set-output name=test::'testValue'"
-    Write-Output "::set-output name=actions::'$($jsonObject)'"
+    
+    Write-Output "::set-output name=actions::'$jsonObject'"
+    Write-Host "Stored actions in outputs list. Use $${{ steps.<step id>.outputs.actions }} in next action to load the json"
 }
 
 try {
