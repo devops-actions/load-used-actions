@@ -7,7 +7,7 @@ The output is stored with the name `actions`, which can be retrieved in another 
 |Name|Description|
 |---|---|
 |organization|The name of the organization to run on.|
-|PAT|The Personal Access Token to use for the API call.|
+|PAT|The Personal Access Token to use for the API calls.|
 
 ## Outputs
 actions: a compressed json string with all the actions used in the workflows in the organization. The json is in the format:
