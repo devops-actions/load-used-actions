@@ -71,9 +71,7 @@ jobs:
 
       - shell: pwsh        
         name: Store json file
-        run: |         
-         $content = ${{ steps.load-actions.outputs.actions }}
-         New-Item -Path 'actions.json' -Value $content -Force | Out-Null
+        run: echo ${{ steps.load-actions.outputs.actions }} > 'actions.json'
             
       - name: Upload result file as artefact
         uses: actions/upload-artifact@v2
