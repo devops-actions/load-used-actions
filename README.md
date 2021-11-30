@@ -3,6 +3,8 @@ Load used actions from an entire organization, by calling the REST API with a Pe
 
 The output is stored with the name `actions`, which can be retrieved in another action with `${{ steps.<step id>.outputs.actions }}`.
 
+Used for inserting data into the [internal actions marketplace](https://github.com/rajbos/actions-marketplace).
+
 ## Inputs
 |Name|Description|
 |---|---|
