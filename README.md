@@ -20,9 +20,9 @@ actions: a compressed json string with all the actions used in the workflows in 
     "workflows": [
         {
             "repo": "rajbos/actions-marketplace",
-            "workflowFileName: "build-image.yml"
+            "workflowFileName": "build-image.yml"
         },
-        { etc }
+        { "etc" : "--" }
     ]
 ]
 ```
