@@ -48,7 +48,7 @@ function CallWebRequest {
         # convert the response json content
         $info = ($result.Content | ConvertFrom-Json)
     
-        Write-Host "  Paging links: $($result.Headers["Link"])"
+        Write-Debug "  Paging links: $($result.Headers["Link"])"
         # Test for paging links and try to enumerate all pages
         if ($null -ne $result.Headers["Link"]) {
             #Write-Warning "Paging link detected:"
@@ -306,7 +306,7 @@ function GetRawFile {
     Write-Host "Loading file content from url [$url]"
     
     $Headers = Get-Headers -userName $userName -PAT $PAT
-    $result = Invoke-WebRequest -Uri $url -Headers $Headers -skipWarnings $true -Method Get -ErrorAction Stop | Select-Object -Expand Content
+    $result = Invoke-WebRequest -Uri $url -Headers $Headers -Method Get -ErrorAction Stop | Select-Object -Expand Content
 
     return $result
 }
