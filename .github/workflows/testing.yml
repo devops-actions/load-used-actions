@@ -8,6 +8,7 @@ on:
 jobs:
   load-all-used-actions:
     runs-on: ubuntu-latest
+    name: Test on current organization
     steps: 
       - uses: actions/checkout@v2
 
@@ -16,6 +17,7 @@ jobs:
         with: 
           PAT: ${{ secrets.GITHUB_TOKEN }}
         id: load-actions
+
       - shell: pwsh        
         run: |
          Write-Host "Found actions [${{ steps.load-actions.outputs.actions }}]"
@@ -32,5 +34,39 @@ jobs:
       - name: Upload result file as artefact
         uses: actions/upload-artifact@v2
         with: 
-          name: actions
+          name: actions-${{ env.GITHUB_REPOSITORY_OWNER }}
+          path: actions.json
+
+  load-all-used-actions-other-org:
+    runs-on: ubuntu-latest
+    name: Test on different organization
+    env:
+      organization: rajbos-actions
+    steps: 
+      - uses: actions/checkout@v2
+
+      - uses: ./
+        name: Load used actions
+        with: 
+          PAT: ${{ secrets.GITHUB_TOKEN }}
+          organization: ${{ env.organization }}
+        id: load-actions
+
+      - shell: pwsh        
+        run: |
+         Write-Host "Found actions [${{ steps.load-actions.outputs.actions }}]"
+         $content = ${{ steps.load-actions.outputs.actions }}
+         New-Item -Path 'actions.json' -Value $content -Force | Out-Null
+         $actions = $content | ConvertFrom-Json
+         if ($actions.Length -le 0) {
+            throw "No actions found"
+         } 
+         else {
+            Write-Host "Found [$($actions.Length)] actions"
+         }
+            
+      - name: Upload result file as artefact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: actions-${{ env.organization }}
           path: actions.json
