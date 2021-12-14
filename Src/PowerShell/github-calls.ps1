@@ -39,11 +39,11 @@ function CallWebRequest {
             $result = Invoke-WebRequest -Uri $url -Headers $Headers -Method $verbToUse -Body $bodyContent -ErrorAction Stop
         }
         
-        Write-Host "  StatusCode: $($result.StatusCode)"
-        Write-Host "  RateLimit-Limit: $($result.Headers["X-RateLimit-Limit"])"
-        Write-Host "  RateLimit-Remaining: $($result.Headers["X-RateLimit-Remaining"])"
-        Write-Host "  RateLimit-Reset: $($result.Headers["X-RateLimit-Reset"])"
-        Write-Host "  RateLimit-Used: $($result.Headers["x-ratelimit-used"])"
+        Write-Debug "  StatusCode: $($result.StatusCode)"
+        Write-Debug "  RateLimit-Limit: $($result.Headers["X-RateLimit-Limit"])"
+        Write-Debug "  RateLimit-Remaining: $($result.Headers["X-RateLimit-Remaining"])"
+        Write-Debug "  RateLimit-Reset: $($result.Headers["X-RateLimit-Reset"])"
+        Write-Debug "  RateLimit-Used: $($result.Headers["x-ratelimit-used"])"
                 
         # convert the response json content
         $info = ($result.Content | ConvertFrom-Json)
@@ -177,7 +177,7 @@ function GetAllFilesInPath {
     #force testing with private repo:
     #$repository = "rajbos/k8s-actions-runner-test"
     $url = GetGitHubUrl "repos/$repository/contents/$path"
-    $info = CallWebRequest -url $url -userName $userName -PAT $PAT #-skipWarnings $true
+    $info = CallWebRequest -url $url -userName $userName -PAT $PAT -skipWarnings $true
 
     return $info
 }
@@ -290,7 +290,7 @@ function FindAllRepos {
     if ($info.GetType() -eq [string] -And $info.StartsWith("https://docs.github.com/")) {
         Write-Warning "Error loading information from org with name [$orgName], trying with user based repository list"
         $url = GetGitHubUrl "users/$orgName/repos"
-        $info = CallWebRequest -url $url -userName $userName -PAT $PAT
+        $info = CallWebRequest -url $url -userName $userName -PAT $PAT -skipWarnings $true
     }
 
     Write-Host "Found [$($info.Count)] repositories in [$orgName]"
@@ -306,7 +306,7 @@ function GetRawFile {
     Write-Host "Loading file content from url [$url]"
     
     $Headers = Get-Headers -userName $userName -PAT $PAT
-    $result = Invoke-WebRequest -Uri $url -Headers $Headers -Method Get -ErrorAction Stop | Select-Object -Expand Content
+    $result = Invoke-WebRequest -Uri $url -Headers $Headers -skipWarnings $true -Method Get -ErrorAction Stop | Select-Object -Expand Content
 
     return $result
 }
