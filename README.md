@@ -11,10 +11,9 @@ Minimal uses expression to use this action:
 ``` yaml
 uses: devops-actions/github-action-load-used-actions@main`
 with: 
-    PAT: ${{ secrets.GITHUB_TOKEN }}
+    PAT: ${{ secrets.GITHUB_TOKEN }} # use an Access Token with correct permissions to view private repos if you need to
 ```
-Note: the default GITHUB_TOKEN might only have read access to the current repository, depending on the setup. Create a new token with `repo` scope to have full read-only access to the organization and use that as a parameter.  
--[ ] todo: check the scope and update above if needed
+Note: the default GITHUB_TOKEN might only have read access to the current repository but can read the public repositories for any organization, depending on the specific setup of the GITHUB_TOKEN. Create a new access token (PAT or use a GitHub App) with `repo` scope to have full read-only access to the organization and use that as a parameter.  
 
 ## Full example
 This example shows how to use the action to get a json file with all the used actions in an organization. The json file is uploaded as an artefact in the third step.
@@ -35,7 +34,7 @@ jobs:
         name: Load used actions        
         id: load-actions
         with: 
-          PAT: ${{ secrets.GITHUB_TOKEN }}
+          PAT: ${{ secrets.GITHUB_TOKEN }} # use an Access Token with correct permissions to view private repos if you need to
 
       - shell: pwsh        
         name: Store json file
