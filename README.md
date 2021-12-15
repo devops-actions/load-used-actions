@@ -5,6 +5,49 @@ The output is stored with the name `actions`, which can be retrieved in another 
 
 Used for inserting data into the [internal actions marketplace](https://github.com/rajbos/actions-marketplace).
 
+## Example usage
+Minimal uses expression to use this action:
+
+``` yaml
+uses: devops-actions/github-action-load-used-actions@main`
+with: 
+    PAT: ${{ secrets.GITHUB_TOKEN }}
+```
+Note: the default GITHUB_TOKEN might only have read access to the current repository, depending on the setup. Create a new token with `repo` scope to have full read-only access to the organization and use that as a parameter.  
+-[ ] todo: check the scope and update above if needed
+
+## Full example
+This example shows how to use the action to get a json file with all the used actions in an organization. The json file is uploaded as an artefact in the third step.
+
+|#|Name|Description|
+|---|---|---|
+|1|Load used actions|Run this action to load all actions used in an organization. Note the id of this step|
+|2|Store json file|Output the json value from the output of the action in step 1, by using the id of step 1 in `${{ steps.<step id>.outputs.actions }}`|
+|3|Upload result file as artefact|Upload the json file as an artefact|
+
+
+``` yaml
+jobs:
+  load-all-used-actions:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: devops-actions/github-action-load-used-actions@main
+        name: Load used actions        
+        id: load-actions
+        with: 
+          PAT: ${{ secrets.GITHUB_TOKEN }}
+
+      - shell: pwsh        
+        name: Store json file
+        run: echo ${{ steps.load-actions.outputs.actions }} > 'actions.json'
+            
+      - name: Upload result file as artefact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: actions
+          path: actions.json
+```
+
 ## Inputs
 |Name|Description|
 |---|---|
@@ -38,46 +81,3 @@ The workflow object has the following properties:
 |----|-----------|
 |repo|The name of the repository that uses the action|
 |workflowFileName|The name of the workflow file that was found in the directory `.github/workflows/`|
-
-## Example usage
-Minimal uses expression to use this action:
-
-``` yaml
-uses: rajbos/github-action-load-used-actions@main`
-with: 
-    PAT: ${{ secrets.GITHUB_TOKEN }}
-```
-Note: the default GITHUB_TOKEN might only have read access to the current repository, depending on the setup. Create a new token with `repo` scope to have full read-only access to the organization and use that as a parameter.  
--[ ] todo: check the scope and update above if needed
-
-## Full example
-This example shows how to use the action to get a json file with all the used actions in an organization. The json file is uploaded as an artefact in the third step.
-
-|#|Name|Description|
-|---|---|---|
-|1|Load used actions|Run this action to load all actions used in an organization. Note the id of this step|
-|2|Store json file|Output the json value from the output of the action in step 1, by using the id of step 1 in `${{ steps.<step id>.outputs.actions }}`|
-|3|Upload result file as artefact|Upload the json file as an artefact|
-
-
-``` yaml
-jobs:
-  load-all-used-actions:
-    runs-on: ubuntu-latest
-    steps: 
-      - uses: rajbos/github-action-load-used-actions@main
-        name: Load used actions
-        with: 
-          PAT: ${{ secrets.GITHUB_TOKEN }}
-        id: load-actions
-
-      - shell: pwsh        
-        name: Store json file
-        run: echo ${{ steps.load-actions.outputs.actions }} > 'actions.json'
-            
-      - name: Upload result file as artefact
-        uses: actions/upload-artifact@v2
-        with: 
-          name: actions
-          path: actions.json
-```
