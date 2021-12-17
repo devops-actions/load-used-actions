@@ -16,8 +16,5 @@ outputs:
   actions:
     description: 'List of all actions used in the organization'  
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args: 
-    - '${{ inputs.organization }}' 
-    - '${{ inputs.PAT }}' 
+  using: 'node12'
+  main: 'dist/main.js'
