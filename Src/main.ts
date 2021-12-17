@@ -326,7 +326,8 @@ async function loadActionsFromWorkflows(client: Octokit, workflows: Content[]) {
 
             // try to parse the yaml
             try {
-                const parsed = YAML.parse(content)
+                const parsed = YAML.parse(content, { schema: 'yaml-1.1' })          
+                // json fails                      
                 
                 console.log(`Found these jobs: ${JSON.stringify(parsed.jobs)})`)
                 for (const job of parsed.jobs) {
