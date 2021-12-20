@@ -16,6 +16,7 @@ jobs:
         name: Load used actions
         with: 
           PAT: ${{ secrets.GITHUB_TOKEN }}
+          user: ${{ env.GITHUB_REPOSITORY_OWNER }}
         id: load-actions
 
       - shell: pwsh        
@@ -48,7 +49,7 @@ jobs:
       - uses: ./
         name: Load used actions
         with: 
-          PAT: ${{ secrets.GITHUB_TOKEN }}
+          PAT: ${{ secrets.PAT }}
           organization: ${{ env.organization }}
         id: load-actions
 
