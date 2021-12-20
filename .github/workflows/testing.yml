@@ -9,6 +9,8 @@ jobs:
   load-all-used-actions:
     runs-on: ubuntu-latest
     name: Test on current organization
+    env:
+      user: rajbos
     steps: 
       - uses: actions/checkout@v2
 
@@ -16,7 +18,7 @@ jobs:
         name: Load used actions
         with: 
           PAT: ${{ secrets.GITHUB_TOKEN }}
-          user: ${{ env.GITHUB_REPOSITORY_OWNER }}
+          user: ${{ env.user }} 
         id: load-actions
 
       - shell: pwsh        
