@@ -23142,11 +23142,11 @@ function run() {
       const octokit = new import_octokit.Octokit({ auth: PAT });
       const repos = yield findAllRepos(octokit, user, organization);
       console.log(`Found [${repos.length}] repositories`);
-      let workflows = yield findAllWorkflows(octokit, repos);
-      loadActionsFromWorkflows(octokit, workflows);
+      const workflows = yield findAllWorkflows(octokit, repos);
+      const actions = yield loadActionsFromWorkflows(octokit, workflows);
       const output = {
         lastUpdated: GetDateFormatted(new Date()),
-        actions: [],
+        actions,
         organization,
         user
       };
@@ -23263,6 +23263,7 @@ function loadActionsFromWorkflows(client, workflows) {
       }
     }
     console.log(`Found a total of [${allActions.length}] actions used in [${workflows.length}] workflows`);
+    return allActions;
   });
 }
 run();

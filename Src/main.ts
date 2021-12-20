@@ -47,20 +47,20 @@ async function run(): Promise<void> {
     const repos = await findAllRepos(octokit, user, organization)
     console.log(`Found [${repos.length}] repositories`)
 
-    let workflows = await findAllWorkflows(octokit, repos)
+    const workflows = await findAllWorkflows(octokit, repos)
     // load the information in the files
     //actionFiles = await enrichActionFiles(octokit, actionFiles)
-    loadActionsFromWorkflows(octokit, workflows)
+    const actions = await loadActionsFromWorkflows(octokit, workflows)
 
     // output the json we want to output
     const output: {
       lastUpdated: string
       organization: string
       user: string
-      actions: Content[]
+      actions: action[]
     } = {
       lastUpdated: GetDateFormatted(new Date()),
-      actions: [], // actionFiles,
+      actions: actions,
       organization,
       user
     }
@@ -319,7 +319,7 @@ async function enrichActionFiles(
   return actionFiles
 }
 
-async function loadActionsFromWorkflows(client: Octokit, workflows: Content[]) {
+async function loadActionsFromWorkflows(client: Octokit, workflows: Content[]): Promise<action[]> {
     
     let allActions: action[] = []
     for (const workflow of workflows) {
@@ -333,8 +333,8 @@ async function loadActionsFromWorkflows(client: Octokit, workflows: Content[]) {
             allActions = allActions.concat(actions)
         }
     }
-    //return actionFiles
     console.log(`Found a total of [${allActions.length}] actions used in [${workflows.length}] workflows`)
+    return allActions
 }
 
 
