@@ -45,11 +45,8 @@ async function run(): Promise<void> {
     // }
 
     const repos = await findAllRepos(octokit, user, organization)
-    console.log(`Found [${repos.length}] repositories`)
-
     const workflows = await findAllWorkflows(octokit, repos)
     // load the information in the files
-    //actionFiles = await enrichActionFiles(octokit, actionFiles)
     const actions = await loadActionsFromWorkflows(octokit, workflows)
 
     // output the json we want to output

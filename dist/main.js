@@ -23141,7 +23141,6 @@ function run() {
       }
       const octokit = new import_octokit.Octokit({ auth: PAT });
       const repos = yield findAllRepos(octokit, user, organization);
-      console.log(`Found [${repos.length}] repositories`);
       const workflows = yield findAllWorkflows(octokit, repos);
       const actions = yield loadActionsFromWorkflows(octokit, workflows);
       const output = {

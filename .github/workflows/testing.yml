@@ -21,24 +21,16 @@ jobs:
           user: ${{ env.user }} 
         id: load-actions
 
-      - shell: pwsh        
-        run: |
-         Write-Host "Found actions [${{ steps.load-actions.outputs.actions }}]"
-         $content = ${{ steps.load-actions.outputs.actions }}
-         New-Item -Path 'actions.json' -Value $content -Force | Out-Null
-         $actions = $content | ConvertFrom-Json
-         if ($actions.Length -le 0) {
-            throw "No actions found"
-         } 
-         else {
-            Write-Host "Found [$($actions.Length)] actions"
-         }
+      - name: Store output in result file
+        run: echo '${{ steps.load-actions.outputs.actions }}' > 'actions.json'      
             
       - name: Upload result file as artefact
         uses: actions/upload-artifact@v2
         with: 
-          name: actions-${{ env.GITHUB_REPOSITORY_OWNER }}
+          name: actions-user
           path: actions.json
+
+      - run: echo $GITHUB_REPOSITORY_OWNER
 
   load-all-used-actions-other-org:
     runs-on: ubuntu-latest
@@ -55,18 +47,8 @@ jobs:
           organization: ${{ env.organization }}
         id: load-actions
 
-      - shell: pwsh        
-        run: |
-         Write-Host "Found actions [${{ steps.load-actions.outputs.actions }}]"
-         $content = ${{ steps.load-actions.outputs.actions }}
-         New-Item -Path 'actions.json' -Value $content -Force | Out-Null
-         $actions = $content | ConvertFrom-Json
-         if ($actions.Length -le 0) {
-            throw "No actions found"
-         } 
-         else {
-            Write-Host "Found [$($actions.Length)] actions"
-         }
+      - name: Store output in result file
+        run: echo '${{ steps.load-actions.outputs.actions }}' > 'actions.json'
             
       - name: Upload result file as artefact
         uses: actions/upload-artifact@v2
