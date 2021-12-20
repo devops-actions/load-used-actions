@@ -51,6 +51,7 @@ async function run(): Promise<void> {
     // load the information in the files
     const actions = await loadActionsFromWorkflows(octokit, workflows)
     const uniqueActions = getUniqueActions(actions)
+    console.log(`Found [${uniqueActions.length}] unique actions in total`)
 
     // output the json we want to output
     const output: {

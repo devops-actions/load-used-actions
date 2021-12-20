@@ -23146,6 +23146,7 @@ function run() {
       const workflows = yield findAllWorkflows(octokit, repos);
       const actions = yield loadActionsFromWorkflows(octokit, workflows);
       const uniqueActions = getUniqueActions(actions);
+      console.log(`Found [${uniqueActions.length}] unique actions in total`);
       const output = {
         lastUpdated: GetDateFormatted(new Date()),
         actions,
