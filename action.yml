@@ -7,10 +7,13 @@ branding:
   color: blue
 inputs:
   organization:
-    description: 'Slug of the organization to analyze. Leave empty for current organization'
+    description: 'Slug of the organization to analyze.'
+    required: false
+  user:
+    description: 'Slug of the user space to analyze.'
     required: false
   PAT:
-    description: 'Personal access token to use for analysis. Leaving this empty will use the default GITHUB_TOKEN that could have limited access rights'
+    description: 'Personal access token to use for analysis. Using the default GITHUB_TOKEN will only show info from public repos'
     required: true 
 outputs:
   actions:
