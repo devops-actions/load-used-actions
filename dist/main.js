@@ -11051,10 +11051,10 @@ var require_dist_node20 = __commonJS({
     async function emitEvent(state, context) {
       const {
         name,
-        action: action2
+        action: action3
       } = context;
-      if (state.eventHandlers[`${name}.${action2}`]) {
-        for (const eventHandler of state.eventHandlers[`${name}.${action2}`]) {
+      if (state.eventHandlers[`${name}.${action3}`]) {
+        for (const eventHandler of state.eventHandlers[`${name}.${action3}`]) {
           await eventHandler(context);
         }
       }
@@ -23048,7 +23048,7 @@ var import_dotenv = __toModule(require_main());
 // src/parsing.ts
 var import_yaml = __toModule(require_dist());
 function parse(content, workflow, repo) {
-  console.log("Starting");
+  console.log(`Starting analysis of workflow [${workflow}] in repo [${repo}]`);
   let actions = [];
   try {
     let foundJobs = false;
@@ -23071,13 +23071,26 @@ function parse(content, workflow, repo) {
       }
     }
     try {
-      let parsed = import_yaml.default.parse(content.join("\r\n"), { schema: "yaml-1.1" });
+      let parsed;
+      try {
+        parsed = import_yaml.default.parse(content.join("\r\n"));
+      } catch (e) {
+        console.log(`Error parsing the workflow [${workflow}] in repo [${repo}]`);
+        console.log(`${e}`);
+        return actions;
+      }
       for (const job of parsed.jobs) {
-        for (const step of job.steps) {
-          if ("uses" in step) {
-            const action2 = loadActionFromUses(step.uses, workflow, repo);
-            console.log(`  - Found action: ${JSON.stringify(action2)}`);
-            actions.push(action2);
+        if ("steps" in job) {
+          for (const step of job.steps) {
+            if ("uses" in step) {
+              const action3 = loadActionFromUses(step.uses, workflow, repo);
+              console.log(`  - Found action: ${JSON.stringify(action3)}`);
+              actions.push(action3);
+            }
+          }
+        } else {
+          if ("uses" in job) {
+            console.log(`  - Found reusable workflow: ${JSON.stringify(job.uses)}`);
           }
         }
       }
@@ -23087,11 +23100,10 @@ function parse(content, workflow, repo) {
       console.log(e);
     }
   } catch (error) {
-    console.log(`Error parsing action file with error:`);
+    console.log(`Error parsing workflow file [${workflow}] with error:`);
     console.log(error);
     console.log(`The parsing error is informational, seaching for actions has continued`);
   }
-  console.log("End");
   return actions;
 }
 function loadActionFromUses(uses, workflow, repo) {
@@ -23128,13 +23140,6 @@ function run() {
         return;
       }
       const octokit = new import_octokit.Octokit({ auth: PAT });
-      try {
-        const currentUser = yield octokit.rest.users.getAuthenticated();
-        core.info(`Hello, ${currentUser.data.login}`);
-      } catch (error) {
-        core.setFailed(`Could not authenticate with PAT. Please check that it is correct and that it has [read access] to the organization or user account: ${error}`);
-        return;
-      }
       const repos = yield findAllRepos(octokit, user, organization);
       console.log(`Found [${repos.length}] repositories`);
       let workflows = yield findAllWorkflows(octokit, repos);
@@ -23209,9 +23214,6 @@ function findAllWorkflows(client, repos) {
         currentCount = repoContent.length;
       }
       console.log(`  Found [${currentCount}] workflows in repository: ${repo.name} `);
-      if (result.length !== 0) {
-        return result;
-      }
     }
     console.log(`Found [${result.length}] workflows in [${repos.length}] repos`);
     return result;
@@ -23251,26 +23253,16 @@ function getWorkflowFiles(client, repo) {
 }
 function loadActionsFromWorkflows(client, workflows) {
   return __async(this, null, function* () {
+    let allActions = [];
     for (const workflow of workflows) {
       if (workflow.downloadUrl !== null) {
         const { data: content } = yield client.request({ url: workflow.downloadUrl });
-        const path = "example.yml";
-        const repo = "empty";
-        const actions = parse(content, path, repo);
-        console.log(`Found [${actions.length}] actions`);
-        try {
-          const parsed = import_yaml2.default.parse(content, { schema: "yaml-1.1" });
-          console.log(`Found these jobs: ${JSON.stringify(parsed.jobs)})`);
-          for (const job of parsed.jobs) {
-            console.log(`- Found job: ${JSON.stringify(job)}`);
-          }
-        } catch (error) {
-          console.log(`Error parsing action file in repo [${workflow.repo}] with error:`);
-          console.log(error);
-          console.log(`The parsing error is informational, seaching for actions has continued`);
-        }
+        const splitted = content.split("\n");
+        const actions = parse(splitted, workflow.name, workflow.repo);
+        allActions = allActions.concat(actions);
       }
     }
+    console.log(`Found a total of [${allActions.length}] actions used in [${workflows.length}] workflows`);
   });
 }
 run();
