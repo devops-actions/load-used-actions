@@ -81,6 +81,7 @@ async function findAllRepos(
   const result: Repository[] = []
 
   if (username !== '') {
+    core.info(`Searching for repositories for user: [${username}]`)
     const repos = await client.paginate(client.rest.repos.listForUser, {
       username
     })
@@ -97,6 +98,7 @@ async function findAllRepos(
   }
 
   if (organization !== '') {
+    core.info(`Searching for repositories in organization: [${organization}]`)
     const repos = await client.paginate(client.rest.repos.listForOrg, {
       org: organization
     })

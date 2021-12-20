@@ -23161,6 +23161,7 @@ function findAllRepos(client, username, organization) {
     var _a, _b;
     const result = [];
     if (username !== "") {
+      core.info(`Searching for repositories for user: [${username}]`);
       const repos = yield client.paginate(client.rest.repos.listForUser, {
         username
       });
@@ -23172,6 +23173,7 @@ function findAllRepos(client, username, organization) {
       }
     }
     if (organization !== "") {
+      core.info(`Searching for repositories in organization: [${organization}]`);
       const repos = yield client.paginate(client.rest.repos.listForOrg, {
         org: organization
       });
