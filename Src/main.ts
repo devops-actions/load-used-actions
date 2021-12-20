@@ -31,7 +31,9 @@ async function run(): Promise<void> {
       return
     }
 
-    const octokit = new Octokit({auth: PAT})
+    const apiUrl = process.env.GITHUB_API_URL || 'https://api.github.com' 
+    core.debug(`Using API URL: ${apiUrl}`)
+    const octokit = new Octokit({auth: PAT, baseUrl: apiUrl})
 
     // try {
     //   const currentUser = await octokit.rest.users.getAuthenticated()

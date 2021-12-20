@@ -35,10 +35,11 @@ jobs:
         id: load-actions
         with: 
           PAT: ${{ secrets.GITHUB_TOKEN }} # use an Access Token with correct permissions to view private repos if you need to
+          user: ${{ github.actor }} # use the user that triggered the action to search all repos in that user space
 
       - shell: pwsh        
         name: Store json file
-        run: echo ${{ steps.load-actions.outputs.actions }} > 'actions.json'
+        run: echo '${{ steps.load-actions.outputs.actions }}' > 'actions.json'
             
       - name: Upload result file as artefact
         uses: actions/upload-artifact@v2

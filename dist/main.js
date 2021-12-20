@@ -23139,7 +23139,9 @@ function run() {
         core.setFailed("Either parameter 'user' or 'organization' is required to load all workflows from it. Please provide one of them.");
         return;
       }
-      const octokit = new import_octokit.Octokit({ auth: PAT });
+      const apiUrl = process.env.GITHUB_API_URL || "https://api.github.com";
+      core.debug(`Using API URL: ${apiUrl}`);
+      const octokit = new import_octokit.Octokit({ auth: PAT, baseUrl: apiUrl });
       const repos = yield findAllRepos(octokit, user, organization);
       const workflows = yield findAllWorkflows(octokit, repos);
       const actions = yield loadActionsFromWorkflows(octokit, workflows);
