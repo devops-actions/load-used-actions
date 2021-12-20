@@ -8,7 +8,9 @@ on:
 jobs:
   load-all-used-actions:
     runs-on: ubuntu-latest
-    name: Test on current organization
+    name: Test on current owner
+    env:
+      owner: rajbos
     steps: 
       - uses: actions/checkout@v2
 
@@ -16,7 +18,7 @@ jobs:
         name: Load used actions
         with: 
           PAT: ${{ secrets.GITHUB_TOKEN }}
-          user: ${{ env.GITHUB_REPOSITORY_OWNER }} 
+          user: ${{ env.owner }} 
         id: load-actions
 
       - name: Store output in result file
@@ -25,7 +27,7 @@ jobs:
       - name: Upload result file as artefact
         uses: actions/upload-artifact@v2
         with: 
-          name: actions-${{ env.GITHUB_REPOSITORY_OWNER }}
+          name: actions-${{ env.owner }}
           path: actions.json
 
   load-all-used-actions-other-org:
