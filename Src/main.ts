@@ -50,6 +50,7 @@ async function run(): Promise<void> {
     const workflows = await findAllWorkflows(octokit, repos)
     // load the information in the files
     const actions = await loadActionsFromWorkflows(octokit, workflows)
+    const uniqueActions = getUniqueActions(actions)
 
     // output the json we want to output
     const output: {
@@ -57,11 +58,13 @@ async function run(): Promise<void> {
       organization: string
       user: string
       actions: action[]
+      uniqueActions: string[]
     } = {
       lastUpdated: GetDateFormatted(new Date()),
       actions: actions,
       organization,
-      user
+      user,
+      uniqueActions
     }
 
     const json = JSON.stringify(output)
@@ -340,3 +343,8 @@ async function loadActionsFromWorkflows(client: Octokit, workflows: Content[]): 
 
 
 run()
+
+function getUniqueActions(actions: action[]):string[] {
+    const unique = new Set(actions.map(action => action.name))
+    return Array.from(unique)
+}

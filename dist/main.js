@@ -23145,11 +23145,13 @@ function run() {
       const repos = yield findAllRepos(octokit, user, organization);
       const workflows = yield findAllWorkflows(octokit, repos);
       const actions = yield loadActionsFromWorkflows(octokit, workflows);
+      const uniqueActions = getUniqueActions(actions);
       const output = {
         lastUpdated: GetDateFormatted(new Date()),
         actions,
         organization,
-        user
+        user,
+        uniqueActions
       };
       const json = JSON.stringify(output);
       core.setOutput("actions", json);
@@ -23270,6 +23272,10 @@ function loadActionsFromWorkflows(client, workflows) {
   });
 }
 run();
+function getUniqueActions(actions) {
+  const unique = new Set(actions.map((action3) => action3.name));
+  return Array.from(unique);
+}
 /*!
  * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
  *
