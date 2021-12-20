@@ -1,0 +1,81 @@
+# origin: https://github.com/rajbos/github-actions-requests/blob/main/.github/workflows/final-signoff.yml
+name: Final signoff
+
+on:
+  issues:
+    types: [labeled]
+        
+env: 
+  fork-destination: rajbos-actions # where to place the forks
+    
+jobs:
+  find-action-name:
+    if: github.event.label.name == 'final-signoff'
+    uses: rajbos/github-actions-requests/.github/workflows/get-action-from-issue.yml@main
+    with:
+      issue_number: ${{ github.event.inputs.issue }}
+
+  fork-the-action:
+    runs-on: ubuntu-latest
+    needs: find-action-name
+    name: Fork the action to [${{ env.fork-destination }}]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/github-script@v5  
+      name: Check input variables have values     
+      with: 
+        github-token: ${{ secrets.GH_TOKEN }}
+        script: |          
+          // note: owner is now the organization the FORK lives in:
+          const repo = `${{ needs.find-action-name.outputs.name }}`
+          const owner = `${{ needs.find-action-name.outputs.owner }}`
+          const issue_number = `${{ needs.find-action-name.outputs.request_issue }}`
+          
+          const destinationOrg = `${{ env.fork-destination }}`
+          console.log(`owner: ${owner}, repo: ${repo}, with issue_number: ${issue_number} to fork it to ${destinationOrg}`)
+         
+    # fork the action repo to the correct org
+    - name: Fork the action repository to ${{ env.fork-destination }}
+      uses: rajbos-actions/forker@v0.0.1
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        repo: ${{ needs.find-action-name.outputs.name }}
+        owner: ${{ needs.find-action-name.outputs.owner }}
+        org: ${{ env.fork-destination }}
+
+      
+    - uses: actions/github-script@v5  
+      name: Report back to user
+      with: 
+        github-token: ${{ secrets.GH_TOKEN }}
+        script: |          
+          // note: owner is now the organization the FORK lives in:         
+          owner = "${{ needs.find-action-name.outputs.owner }}"
+          name = "${{ needs.find-action-name.outputs.name }}"
+          request_owner = "${{ needs.find-action-name.outputs.request_owner }}"
+          request_repo = "${{ needs.find-action-name.outputs.request_repo }}"
+          request_issue = ${{ needs.find-action-name.outputs.request_issue }}
+          
+          const destinationOrg = `${{ env.fork-destination }}`
+
+          console.log(`owner: ${owner}, repo: ${name}, with issue_number: ${request_issue} to fork it to ${destinationOrg}`)
+
+          // tell the user that it happened
+          // TODO: does this work with github.com or load url from env variable
+          const linkUrl = `/${destinationOrg}/${{ needs.find-action-name.outputs.name }}`
+          console.log(`Forked ${linkUrl} to ${destinationOrg}`)
+
+          const commentBody = [
+              `:robot: Forked the action repository over to ${destinationOrg} :zap:`,
+              `Go to [${linkUrl}](${linkUrl}) to see the action repository.`
+          ]          
+
+          // create comment letting the user know the results
+          const commentResult = await github.rest.issues.createComment({
+            owner: request_owner,
+            repo: request_repo,
+            issue_number: request_issue,
+            body: commentBody.join('\n')
+          });
+
+          // todo?: close the issue, maybe the users need to do that themselves?

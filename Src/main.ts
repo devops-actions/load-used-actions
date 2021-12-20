@@ -3,11 +3,13 @@ import {Octokit} from 'octokit'
 import YAML from 'yaml'
 import GetDateFormatted from './utils'
 import dotenv from 'dotenv'
+import { parse, action } from './parsing'
 
 // always import the config
 dotenv.config()
 
 async function run(): Promise<void> {
+ 
   core.info('Starting')
   try {
     const PAT = core.getInput('PAT') || process.env.PAT || ''
@@ -177,10 +179,10 @@ async function findAllWorkflows(
       }
       console.log(`  Found [${currentCount}] workflows in repository: ${repo.name} `)
 
-      // temp for testing so we dont load ALL repos, the first one is enouhg
-      if (result.length !== 0){
-          return result
-      }
+      //temp for testing so we dont load ALL repos, the first one is enough
+      // if (result.length !== 0){
+      //    return result
+      // }
     }
   
     console.log(`Found [${result.length}] workflows in [${repos.length}] repos`)
@@ -218,7 +220,7 @@ async function getWorkflowFiles(
                 result.push(currentWorkflow)
             }
         }        
-        }
+      }
     } catch (error) {
       core.debug(`No .yml file(s) found in repository: ${repo.name}`)
     }      
@@ -319,34 +321,20 @@ async function enrichActionFiles(
 
 async function loadActionsFromWorkflows(client: Octokit, workflows: Content[]) {
     
+    let allActions: action[] = []
     for (const workflow of workflows) {
         // download the file in it and parse it
         if (workflow.downloadUrl !== null) {
             const {data: content} = await client.request({url: workflow.downloadUrl})
+            // downloads as a string with \n line endings
+            const splitted = content.split('\n')
+            const actions = parse(splitted, workflow.name, workflow.repo)            
 
-            // try to parse the yaml
-            try {
-                const parsed = YAML.parse(content, { schema: 'yaml-1.1' })          
-                // json fails                      
-                
-                console.log(`Found these jobs: ${JSON.stringify(parsed.jobs)})`)
-                for (const job of parsed.jobs) {
-                    console.log(`- Found job: ${JSON.stringify(job)}`)
-                }
-            } catch (error) {
-                // this happens in https://github.com/gaurav-nelson/github-action-markdown-link-check/blob/9de9db77de3b29b650d2e2e99f0ee290f435214b/action.yml#L9
-                // because of invalid yaml
-                console.log(
-                    `Error parsing action file in repo [${workflow.repo}] with error:`
-                )
-                console.log(error)
-                console.log(
-                    `The parsing error is informational, seaching for actions has continued`
-                )
-            }
+            allActions = allActions.concat(actions)
         }
-        }
-        //return actionFiles
+    }
+    //return actionFiles
+    console.log(`Found a total of [${allActions.length}] actions used in [${workflows.length}] workflows`)
 }
 
 

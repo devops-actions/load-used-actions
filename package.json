@@ -6,6 +6,9 @@
     "main": "lib/main.js",
     "scripts": {
         "esbuild": "esbuild src/main.ts --bundle --outdir=dist --platform=node --external:vscode --external:@vscode/test-electron --external:jest",
+        
+        "yaml": "esbuild src/testing.ts --bundle --outdir=dist --platform=node --external:vscode --external:@vscode/test-electron --external:jest",
+
         "old_build": "tsc",
         "format": "prettier --write **/*.ts",
         "format-check": "prettier --check **/*.ts",
