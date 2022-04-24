@@ -41,6 +41,8 @@ jobs:
   publish:
     needs: test-local-action
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       
       - name: Get tag value
