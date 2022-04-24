@@ -12,7 +12,7 @@ jobs:
   test-local-action:
     runs-on: ubuntu-latest
     steps: 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: ./
         name: Load used actions
@@ -45,7 +45,7 @@ jobs:
       
       - name: Get tag value
         id: tag
-        uses: dawidd6/action-get-tag@v1
+        uses: rajbos-actions/action-get-tag@v1
         
       - name: Use tag
         run: echo ${{ steps.tag.outputs.tag }}
