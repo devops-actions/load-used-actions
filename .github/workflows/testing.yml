@@ -32,7 +32,7 @@ jobs:
          }
             
       - name: Upload result file as artefact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with: 
           name: actions-${{ env.GITHUB_REPOSITORY_OWNER }}
           path: actions.json
@@ -66,7 +66,7 @@ jobs:
          }
             
       - name: Upload result file as artefact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with: 
           name: actions-${{ env.organization }}
           path: actions.json
