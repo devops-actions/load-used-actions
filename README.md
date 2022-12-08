@@ -1,4 +1,7 @@
 # github-action-load-used-actions
+
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/devops-actions/load-used-actions/badge)](https://api.securityscorecards.dev/projects/github.com/devops-actions/load-used-actions)
+
 Load used actions from an entire organization, by calling the REST API with a Personal Access Token and loop through all workflows in all repositories in the user account or organization.
 
 The output is stored with the name `actions`, which can be retrieved in another action with `${{ steps.<step id>.outputs.actions }}`.
