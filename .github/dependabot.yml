@@ -14,7 +14,7 @@ updates:
     directory: '.github/workflows/'
     # Check the npm registry for updates every week
     schedule:
-      interval: 'weekly'
+      interval: 'monthly'
 
   - package-ecosystem: github-actions
     directory: /
