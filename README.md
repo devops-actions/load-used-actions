@@ -1,4 +1,4 @@
-# github-action-load-used-actions
+# load-used-actions
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/devops-actions/load-used-actions/badge)](https://api.securityscorecards.dev/projects/github.com/devops-actions/load-used-actions)
 
