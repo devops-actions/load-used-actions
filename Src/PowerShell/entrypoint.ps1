@@ -29,8 +29,7 @@ function main {
     Write-Host "Found [$($actions.Count)] actions "
     #Write-Verbose $actions | ConvertTo-Json -Depth 10
     $jsonObject = ($actions | ConvertTo-Json -Depth 10 -Compress)
-    
-    Write-Output "::set-output name=actions::'$jsonObject'"
+    echo "actions='$jsonObject'" >> $env:GITHUB_OUTPUT
     Write-Host "Stored actions in outputs list. Use $${{ steps.<step id>.outputs.actions }} in next action to load the json"
 }
 
