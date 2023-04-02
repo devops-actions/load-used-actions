@@ -27,6 +27,16 @@ function CallWebRequest {
         [boolean] $skipWarnings = $false
     )
 
+    if ([string]::IsNullOrEmpty($userName)) {
+        throw "userName cannot be null or empty"
+    }
+    if ([string]::IsNullOrEmpty($PAT)) {
+        throw "PAT cannot be null or empty"
+    }
+    if ([string]::IsNullOrEmpty($url)) {
+        throw "url cannot be null or empty"
+    }    
+
     $Headers = Get-Headers -userName $userName -PAT $PAT
     Write-Host "Calling api on url [$url]"
 
@@ -80,7 +90,8 @@ function CallWebRequest {
         }
         catch {
             Write-Error "Error calling api on [$url]:"
-            Write-Error $_
+            Write-Error "Error: " $_
+            Write-Error "ErrorDetails: " $_.ErrorDetails
         }
 
         if ($false -eq $skipWarnings) {
@@ -91,7 +102,7 @@ function CallWebRequest {
             Write-Host "  RateLimit-Reset: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Reset"))"
             Write-Host "  RateLimit-Used: $($_.Exception.Response.Headers.GetValues("x-ratelimit-used"))"
             
-            Write-Host "$($_.ErrorDetails.Message)"
+            Write-Host "Message: $($_.ErrorDetails.Message)"
             if ($messageData.message.StartsWith("API rate limit exceeded")) {
                 Write-Error "Rate limit exceeded. Halting execution"
                throw
