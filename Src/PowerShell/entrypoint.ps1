@@ -30,7 +30,7 @@ function main {
     #Write-Verbose $actions | ConvertTo-Json -Depth 10
     $jsonObject = ($actions | ConvertTo-Json -Depth 10 -Compress)
     Set-Content -Value "actions='$jsonObject'" -Path $env:GITHUB_OUTPUT
-    Write-Host "Stored actions in outputs list $($env:GITHUB_OUTPUT). Use $${{ steps.<step id>.outputs.actions }} in next action to load the json"
+    Write-Host "Stored actions in the actions output. Use $${{ steps.<step id>.outputs.actions }} in next action to load the json"
 }
 
 try {
