@@ -12,15 +12,20 @@ param (
 . $PSScriptRoot\generic.ps1
 
 Write-Host "We're running with these parameters:"
-Write-Host " PAT.Length: [$($PAT.Length)]"
-Write-Host " orgName: [$orgName]"
+Write-Host "- PAT.Length: [$($PAT.Length)]"
+Write-Host "- orgName: [$orgName]"
 
 if ($null -eq $userName -or "" -eq $userName) {
     $userName = $env:GITHUB_ACTOR
 }
 
-Write-Host " userName: [$userName]"
-Write-Host " marketplaceRepo: [$marketplaceRepo]"
+if ($userName -eq "dependabot[bot]") {
+    # try to prevent issues with [] in the username
+    $userName = "dependabot"
+}
+
+Write-Host "- userName: [$userName]"
+Write-Host "- marketplaceRepo: [$marketplaceRepo]"
 
 function  GetActionsFromWorkflow {
     param (
