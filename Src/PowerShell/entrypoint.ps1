@@ -31,8 +31,9 @@ function main {
     $jsonObject = ($actions | ConvertTo-Json -Depth 10 -Compress)    
     
     # store the json in a file and write the path to the output variable
-    Write-Host "Location: $($env:GITHUB_WORKSPACE)"
+    Write-Host "Location: [$($env:GITHUB_WORKSPACE)]"
     $filePath = "$($env:GITHUB_WORKSPACE)/used-actions.json"
+    Write-Host "Output file path: [$filePath]"
     Set-Content -Value "$jsonObject" -Path $filePath
     Set-Content -Value "actions-file='$filePath'" -Path $env:GITHUB_OUTPUT
     Write-Host "Stored actions in the actions output. Use $${{ steps.<step id>.outputs.actions }} in next action to load the json"
@@ -40,6 +41,9 @@ function main {
     
     # write json content to output variable for backward compatibility (this used to be the only way to get the json)
     Set-Content -Value "actions='$jsonObject'" -Path $env:GITHUB_OUTPUT
+    Write-Host "File contents: "
+    Write-Host "-----------------"
+    cat $filePath
 }
 
 try {
