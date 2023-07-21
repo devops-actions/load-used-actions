@@ -35,12 +35,30 @@ jobs:
             Write-Host "Found [$($actions.Length)] actions"
             Set-Content -Value "Found [$($actions.Length)] actions" -Path $env:GITHUB_STEP_SUMMARY
          }
-            
+
+      - shell: pwsh
+        name: check the output file location to contain the expected content
+        run: |
+          # check the output file location to contain the expected content
+          Write-Host "Got actions file location here [${{ steps.load-actions.outputs.actions-file }}]"
+          $content = Get-Content -Path "${{ steps.load-actions.outputs.actions-file }}"
+          $actions = $content | ConvertFrom-Json
+          if ($actions.Length -le 0) {
+            Set-Content -Value "No actions found" -Path $env:GITHUB_STEP_SUMMARY
+            throw "No actions found"
+          } 
+          else {
+            Write-Host "Found [$($actions.Length)] actions"
+            Set-Content -Value "Found [$($actions.Length)] actions" -Path $env:GITHUB_STEP_SUMMARY
+          }
+
       - name: Upload result file as artefact
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with: 
           name: actions-${{ env.GITHUB_REPOSITORY_OWNER }}
-          path: actions.json
+          path: |
+            actions.json
+            used-actions.json
 
   load-all-used-actions-other-org:
     runs-on: ubuntu-latest
@@ -71,9 +89,27 @@ jobs:
             Write-Host "Found [$($actions.Length)] actions"
             Set-Content -Value "Found [$($actions.Length)] actions" -Path $env:GITHUB_STEP_SUMMARY
          }
+
+      - shell: pwsh
+        name: check the output file location to contain the expected content
+        run: |
+          # check the output file location to contain the expected content
+          Write-Host "Got actions file location here [${{ steps.load-actions.outputs.actions-file }}]"
+          $content = Get-Content -Path "${{ steps.load-actions.outputs.actions-file }}"
+          $actions = $content | ConvertFrom-Json
+          if ($actions.Length -le 0) {
+            Set-Content -Value "No actions found" -Path $env:GITHUB_STEP_SUMMARY
+            throw "No actions found"
+          } 
+          else {
+            Write-Host "Found [$($actions.Length)] actions"
+            Set-Content -Value "Found [$($actions.Length)] actions" -Path $env:GITHUB_STEP_SUMMARY
+          }
             
       - name: Upload result file as artefact
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with: 
           name: actions-${{ env.organization }}
-          path: actions.json
+          path: |
+            actions.json
+            used-actions.json

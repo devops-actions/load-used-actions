@@ -27,10 +27,19 @@ function main {
 
     # wite the file outside of the container so we can pick it up
     Write-Host "Found [$($actions.Count)] actions "
-    #Write-Verbose $actions | ConvertTo-Json -Depth 10
-    $jsonObject = ($actions | ConvertTo-Json -Depth 10 -Compress)
-    Set-Content -Value "actions='$jsonObject'" -Path $env:GITHUB_OUTPUT
+    $jsonObject = ($actions | ConvertTo-Json -Depth 10 -Compress)    
+    
+    # store the json in a file and write the path to the output variable   
+    $fileName = "used-actions.json"
+    $filePath = "$($env:GITHUB_WORKSPACE)/$fileName"
+    
+    Set-Content -Value "$jsonObject" -Path "$filePath"
+    Set-Content -Value "actions-file=$fileName" -Path $env:GITHUB_OUTPUT
     Write-Host "Stored actions in the actions output. Use $${{ steps.<step id>.outputs.actions }} in next action to load the json"
+    Write-Host "Stored actions file in the actions output. Use $${{ steps.<step id>.outputs.actions-file }} in next action to load the file from the $$GITHUB_WORKSPACE folder"
+    
+    # write json content to output variable for backward compatibility (this used to be the only way to get the json)
+    Add-Content -Value "actions='$jsonObject'" -Path $env:GITHUB_OUTPUT
 }
 
 try {
