@@ -44,6 +44,9 @@ function main {
     Write-Host "File contents: "
     Write-Host "-----------------"
     cat $filePath
+    Write-Host "GITHUB_OUTPUT File contents: "
+    Write-Host "-----------------"
+    cat $env:GITHUB_OUTPUT
 }
 
 try {
