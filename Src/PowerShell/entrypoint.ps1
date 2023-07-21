@@ -35,7 +35,7 @@ function main {
     $filePath = "$($env:GITHUB_WORKSPACE)/used-actions.json"
     Write-Host "Output file path: [$filePath]"
     Set-Content -Value "$jsonObject" -Path $filePath
-    Set-Content -Value "actions-file='$filePath'" -Path $env:GITHUB_OUTPUT
+    Set-Content -Value "actions-file=$filePath" -Path $env:GITHUB_OUTPUT
     Write-Host "Stored actions in the actions output. Use $${{ steps.<step id>.outputs.actions }} in next action to load the json"
     Write-Host "Stored actions file in the actions output. Use $${{ steps.<step id>.outputs.actions-file }} in next action to load the file"
     
