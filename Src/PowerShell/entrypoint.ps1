@@ -40,7 +40,7 @@ function main {
     Write-Host "Stored actions file in the actions output. Use $${{ steps.<step id>.outputs.actions-file }} in next action to load the file"
     
     # write json content to output variable for backward compatibility (this used to be the only way to get the json)
-    Set-Content -Value "actions='$jsonObject'" -Path $env:GITHUB_OUTPUT
+    Add-Content -Value "actions='$jsonObject'" -Path $env:GITHUB_OUTPUT
     Write-Host "File contents: "
     Write-Host "-----------------"
     cat $filePath
