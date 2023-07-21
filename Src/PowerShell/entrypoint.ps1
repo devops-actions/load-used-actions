@@ -32,13 +32,9 @@ function main {
     
     # store the json in a file and write the path to the output variable
     Write-Host "Location: [$($env:RUNNER_TEMP)]"
-    $filePath = "$($env:RUNNER_TEMP)/used-actions.json"
+    $filePath = "used-actions.json"
     Write-Host "Output file path: [$filePath]"
     
-    ForEach ($file in Get-ChildItem "$($env:RUNNER_TEMP)") {
-        Write-Host "- $($file.Name)"
-    }
-
     Set-Content -Value "$jsonObject" -Path "$filePath"
     Set-Content -Value "actions-file=$filePath" -Path $env:GITHUB_OUTPUT
     Write-Host "Stored actions in the actions output. Use $${{ steps.<step id>.outputs.actions }} in next action to load the json"
