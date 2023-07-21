@@ -38,8 +38,8 @@ jobs:
       - shell: pwsh
         run: |
           # check the contents of the current dir
-          echo $env:RUNNER_TEMP
-          cd $env:RUNNER_TEMP
+          echo $env:GITHUB_WORKSPACE
+          cd $env:GITHUB_WORKSPACE
           Write-Host "Where are we? [$pwd]"
 
           ForEach ($file in Get-ChildItem) {

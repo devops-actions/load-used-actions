@@ -32,8 +32,8 @@ function main {
     
     # store the json in a file and write the path to the output variable
     Write-Host "Where are we? [$pwd]"
-    Write-Host "Location: [$($env:RUNNER_TEMP)]"
-    $filePath = "$($env:RUNNER_TEMP)/used-actions.json"
+    Write-Host "Location: [$($env:GITHUB_WORKSPACE)]"
+    $filePath = "$($env:GITHUB_WORKSPACE)/used-actions.json"
     Write-Host "Output file path: [$filePath]"
     
     Set-Content -Value "$jsonObject" -Path "$filePath"
