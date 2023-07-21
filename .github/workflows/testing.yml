@@ -35,6 +35,14 @@ jobs:
             Write-Host "Found [$($actions.Length)] actions"
             Set-Content -Value "Found [$($actions.Length)] actions" -Path $env:GITHUB_STEP_SUMMARY
          }
+      - shell: pwsh
+        run: |
+          # check the contents of the current dir
+          Write-Host "Where are we? [$pwd]"
+
+          ForEach ($file in Get-ChildItem) {
+              Write-Host "- $($file.Name)"
+          }
 
       - shell: pwsh
         run: |
