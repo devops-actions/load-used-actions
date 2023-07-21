@@ -190,7 +190,7 @@ function main() {
         $fileName = "summarized-actions.json"
         $jsonObject = ($summarizeActions | ConvertTo-Json -Depth 10)
         New-Item -Path $fileName -Value $jsonObject -Force | Out-Null
-        Write-Host "Stored the summarized usage info into this file: [$fileName]"
+        Write-Host "Stored the summarized usage info into this file: [$fileName] in this directory: [$PWD]"
 
         # upload the data into the marketplaceRepo
         #Write-Host "Found [$($actionsFound.actions.Length)] actions in use!"
