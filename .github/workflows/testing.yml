@@ -40,7 +40,7 @@ jobs:
         run: |
           # check the output file location to contain the expected content
           Write-Host "Found actions file location here [${{ steps.load-actions.outputs.actions-file }}]"
-          $content = Get-Content -Path '${{ steps.load-actions.outputs.actions-file }}'
+          $content = Get-Content -Path "${{ steps.load-actions.outputs.actions-file }}"
           $actions = $content | ConvertFrom-Json
           if ($actions.Length -le 0) {
             Set-Content -Value "No actions found" -Path $env:GITHUB_STEP_SUMMARY
