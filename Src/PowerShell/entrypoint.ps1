@@ -33,11 +33,12 @@ function main {
     # store the json in a file and write the path to the output variable
     Write-Host "Where are we? [$pwd]"
     Write-Host "Location: [$($env:GITHUB_WORKSPACE)]"
-    $filePath = "$($env:GITHUB_WORKSPACE)/used-actions.json"
+    $fileName = "used-actions.json"
+    $filePath = "$($env:GITHUB_WORKSPACE)/$fileName"
     Write-Host "Output file path: [$filePath]"
     
     Set-Content -Value "$jsonObject" -Path "$filePath"
-    Set-Content -Value "actions-file=$filePath" -Path $env:GITHUB_OUTPUT
+    Set-Content -Value "actions-file=$fileName" -Path $env:GITHUB_OUTPUT
     Write-Host "Stored actions in the actions output. Use $${{ steps.<step id>.outputs.actions }} in next action to load the json"
     Write-Host "Stored actions file in the actions output. Use $${{ steps.<step id>.outputs.actions-file }} in next action to load the file"
     
