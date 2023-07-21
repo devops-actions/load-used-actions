@@ -33,7 +33,7 @@ function main {
     # store the json in a file and write the path to the output variable
     Write-Host "Where are we? [$pwd]"
     Write-Host "Location: [$($env:RUNNER_TEMP)]"
-    $filePath = "used-actions.json"
+    $filePath = "$($env:RUNNER_TEMP)used-actions.json"
     Write-Host "Output file path: [$filePath]"
     
     Set-Content -Value "$jsonObject" -Path "$filePath"
