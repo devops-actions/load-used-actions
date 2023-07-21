@@ -47,7 +47,7 @@ jobs:
       - shell: pwsh
         run: |
           # check the output file location to contain the expected content
-          Write-Host "Found actions file location here [${{ steps.load-actions.outputs.actions-file }}]"
+          Write-Host "Got actions file location here [${{ steps.load-actions.outputs.actions-file }}]"
           $content = Get-Content -Path "${{ steps.load-actions.outputs.actions-file }}"
           $actions = $content | ConvertFrom-Json
           if ($actions.Length -le 0) {

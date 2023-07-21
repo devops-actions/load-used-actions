@@ -31,6 +31,7 @@ function main {
     $jsonObject = ($actions | ConvertTo-Json -Depth 10 -Compress)    
     
     # store the json in a file and write the path to the output variable
+    Write-Host "Where are we? [$pwd]"
     Write-Host "Location: [$($env:RUNNER_TEMP)]"
     $filePath = "used-actions.json"
     Write-Host "Output file path: [$filePath]"
