@@ -11,6 +11,23 @@ function Get-LocationInfo {
     }
 }
 
+function Import-EnvironmentVariables {
+    # load the environment variables from the .env file in the root of the repo:
+    Get-Content "../../.env" | ForEach-Object {
+        $name, $value = $_.split('=')
+        # if name already exists, do not overwrite it:
+        if ($false -eq (Test-Path env:$name)) {
+            if ($null -ne $value -and "" -ne $value) {
+                Write-Host "Setting environment variable [$name] to [$value] from the .env file"
+                Set-Content env:\$name $value
+            }
+        }
+        else {
+            Write-Host "Environment variable [$name] was already set. Value is [$($env:name)]"
+        }
+    }
+}
+
 function main {
 
     if ($null -eq $organization -or "" -eq $organization) {
@@ -42,9 +59,11 @@ function main {
     Add-Content -Value "actions='$jsonObject'" -Path $env:GITHUB_OUTPUT
 }
 
-try {
+$currentLocation = Get-Location
+try {    
     # always run in the correct location, where our scripts are located:
     Set-Location $PSScriptRoot
+    Import-EnvironmentVariables
 
     # call main script:
     main
@@ -56,6 +75,9 @@ catch {
     # return the container with the last exit code: 
     Write-Error "Error loading the actions:"
     Write-Error $_
+
+    Set-Location $currentLocation
+
     # return the container with an erroneous exit code:
     exit 1
 }

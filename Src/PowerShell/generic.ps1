@@ -15,12 +15,16 @@ if($env:computername -ne "ROB-XPS9700") {
     }
 
     # add back the root folder to the modules path because GitHub runner seems to overwite it
-    $env:PSModulePath += ":/root/.local/share/powershell/Modules"
+    # first check if module path already has this value:
+    if ($false -eq ($env:PSModulePath -like "/root/.local/share/powershell/Modules")) {
+        $env:PSModulePath += ":/root/.local/share/powershell/Modules"
+    }
 
     Write-Host "PSModulePath:"
     foreach ($path in $env:PSModulePath -split ':') {
         Write-Host "- [$path]"
     }
+    
     try {
         Write-Host "Importing module for the yaml parsing"
         Import-Module powershell-yaml -Force
