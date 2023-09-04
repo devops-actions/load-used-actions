@@ -42,7 +42,7 @@ function main {
 
     $actions = (.\load-used-actions.ps1 -orgName $organization -PAT $PAT)
 
-    # wite the file outside of the container so we can pick it up
+    # write the file outside of the container so we can pick it up
     Write-Host "Found [$($actions.Count)] actions "
     $jsonObject = ($actions | ConvertTo-Json -Depth 10 -Compress)    
     

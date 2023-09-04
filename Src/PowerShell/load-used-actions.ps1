@@ -93,7 +93,7 @@ function GetAllUsedActionsFromRepo {
         }
         catch {
             Write-Warning "Error handling this workflow file:"
-            Write-Host $workflowFile | ConvertFrom-Json -Depth 10
+            Write-Host $workflowFile.Replace($PAT, "****") | ConvertFrom-Json -Depth 10
             Write-Warning "----------------------------------"
             Write-Host "Error: [$_]"
             Write-Warning "----------------------------------"
