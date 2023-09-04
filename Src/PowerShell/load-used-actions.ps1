@@ -44,16 +44,36 @@ function  GetActionsFromWorkflow {
     foreach ($job in $parsedYaml["jobs"].GetEnumerator()) {
         Write-Host "  Job found: [$($job.Key)]"
         $steps=$job.Value.Item("steps")
-        foreach ($step in $steps) {
-            $uses=$step.Item("uses")
+        if ($null -ne $steps) {
+            foreach ($step in $steps) {
+                $uses=$step.Item("uses")
+                if ($null -ne $uses) {
+                    Write-Host "   Found action used: [$uses]"
+                    $actionLink = $uses.Split("@")[0]
+
+                    $data = [PSCustomObject]@{
+                        actionLink = $actionLink
+                        workflowFileName = $workflowFileName
+                        repo = $repo
+                        type = "action"
+                    }
+
+                    $actions += $data
+                }
+            }
+        }
+        else {
+            # check for reusable workflow
+            $uses = $job.Value.Item("uses")
             if ($null -ne $uses) {
-                Write-Host "   Found action used: [$uses]"
+                Write-Host "   Found reusable workflow used: [$uses]"
                 $actionLink = $uses.Split("@")[0]
 
                 $data = [PSCustomObject]@{
                     actionLink = $actionLink
                     workflowFileName = $workflowFileName
                     repo = $repo
+                    type = "reusable workflow"
                 }
 
                 $actions += $data
@@ -110,7 +130,7 @@ function SummarizeActionsUsed {
 
     $summarized =  @()
     foreach ($action in $actions) {
-        $found = $summarized | Where-Object { $_.actionLink -eq $action.actionLink }
+        $found = $summarized | Where-Object { $_.actionLink -eq $action.actionLink } # todo: summarize with reusable workflows as well
         if ($null -ne $found) {
             # action already found, add this info to it
             $newInfo =  [PSCustomObject]@{
@@ -161,11 +181,12 @@ function LoadAllUsedActionsFromRepos {
             # comment out code below to stop after a certain number of repos to prevent issues with 
             # rate limiting on the load file count (that is not workin correctly)
 
-            #$i++
-            #if ($i -eq 2) {
-            #    # break out on second result:
-            #    return $actions
-            #}
+            $i++
+            if ($i -eq 2) {
+               # break on second result:
+               Write-Host "Breaking after [$i] repos"
+               return $actions
+            }
         }
     }
 

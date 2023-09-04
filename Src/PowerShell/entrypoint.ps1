@@ -68,14 +68,19 @@ try {
     # call main script:
     main
 
+    Write-Host "Going back to location before the run: [$currentLocation]"
+    Set-Location $currentLocation
+
     # return the container with the exit code = Ok:    
     exit 0
 }
 catch {
     # return the container with the last exit code: 
+    $exitError = $_
     Write-Error "Error loading the actions:"
-    Write-Error $_
+    Write-Error $exitError
 
+    Write-Host "Going back to location before the run: [$currentLocation]"
     Set-Location $currentLocation
 
     # return the container with an erroneous exit code:
