@@ -130,9 +130,9 @@ function SummarizeActionsUsed {
 
     $summarized =  @()
     foreach ($action in $actions) {
-        $found = $summarized | Where-Object { $_.actionLink -eq $action.actionLink } # todo: summarize with reusable workflows as well
+        $found = $summarized | Where-Object { $_.actionLink -eq $action.actionLink -And $_.type -eq $action.type } 
         if ($null -ne $found) {
-            # action already found, add this info to it
+            # item already found, add this info to it
             $newInfo =  [PSCustomObject]@{
                 repo = $action.repo
                 workflowFileName = $action.workflowFileName
@@ -142,8 +142,9 @@ function SummarizeActionsUsed {
             $found.count++
         }
         else {
-            # new action, create a new object
+            # new item, create a new object
             $newItem =  [PSCustomObject]@{
+                type = $action.type
                 actionLink = $action.actionLink
                 count = 1
                 workflows =  @(
@@ -151,7 +152,7 @@ function SummarizeActionsUsed {
                         repo = $action.repo
                         workflowFileName = $action.workflowFileName
                     }
-                )           
+                )
             }
             $summarized += $newItem
         }
@@ -170,7 +171,7 @@ function LoadAllUsedActionsFromRepos {
 
     # create hastable
     $actions = @()
-    $i=0
+    #$i=0
     foreach ($repo in $repos) {
         if ($null -ne $repo -And $repo.full_name.Length -gt 0) {
             Write-Host "Loading actions from repo: [$($repo.full_name)]"
@@ -180,13 +181,12 @@ function LoadAllUsedActionsFromRepos {
 
             # comment out code below to stop after a certain number of repos to prevent issues with 
             # rate limiting on the load file count (that is not workin correctly)
-
-            $i++
-            if ($i -eq 2) {
-               # break on second result:
-               Write-Host "Breaking after [$i] repos"
-               return $actions
-            }
+            # $i++
+            # if ($i -eq 2) {
+            #    # break on second result:
+            #    Write-Host "Breaking after [$i] repos"
+            #    return $actions
+            # }
         }
     }
 

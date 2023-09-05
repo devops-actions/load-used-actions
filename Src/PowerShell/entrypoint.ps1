@@ -49,8 +49,18 @@ function main {
     # store the json in a file and write the path to the output variable   
     $fileName = "used-actions.json"
     $filePath = "$($env:GITHUB_WORKSPACE)/$fileName"
-    
-    Set-Content -Value "$jsonObject" -Path "$filePath"
+
+    if ($null -ne $env:GITHUB_WORKSPACE -and "" -ne $env:GITHUB_WORKSPACE) {
+        Write-Host "Writing actions to file in workspace: [$($env:GITHUB_WORKSPACE)]"
+        Set-Content -Value "$jsonObject" -Path "$filePath"
+    }
+    else {
+        Write-Host "Writing actions to file in current folder: [$($pwd)]"
+        $filePath = "./used-actions.json"
+        Set-Content -Value "$jsonObject" -Path "$filePath"
+    }
+
+    # write the name of the file to the output folder
     Set-Content -Value "actions-file=$fileName" -Path $env:GITHUB_OUTPUT
     Write-Host "Stored actions in the actions output. Use $${{ steps.<step id>.outputs.actions }} in next action to load the json"
     Write-Host "Stored actions file in the actions output. Use $${{ steps.<step id>.outputs.actions-file }} in next action to load the file from the $$GITHUB_WORKSPACE folder"
