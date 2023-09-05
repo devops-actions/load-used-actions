@@ -13,6 +13,13 @@ function Get-LocationInfo {
 
 function Import-EnvironmentVariables {
     # load the environment variables from the .env file in the root of the repo:
+    # checik if the file exists :
+    # "../../.env"
+    if ($false -eq (Test-Path "../../.env")) {
+        Write-Debug "No .env file found in the root of the repo"
+        return
+    }
+
     Get-Content "../../.env" | ForEach-Object {
         $name, $value = $_.split('=')
         # if name already exists, do not overwrite it:
