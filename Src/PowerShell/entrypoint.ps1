@@ -11,6 +11,23 @@ function Get-LocationInfo {
     }
 }
 
+function Import-EnvironmentVariables {
+    # load the environment variables from the .env file in the root of the repo:
+    Get-Content "../../.env" | ForEach-Object {
+        $name, $value = $_.split('=')
+        # if name already exists, do not overwrite it:
+        if ($false -eq (Test-Path env:$name)) {
+            if ($null -ne $value -and "" -ne $value) {
+                Write-Host "Setting environment variable [$name] to [$value] from the .env file"
+                Set-Content env:\$name $value
+            }
+        }
+        else {
+            Write-Host "Environment variable [$name] was already set. Value is [$($env:name)]"
+        }
+    }
+}
+
 function main {
 
     if ($null -eq $organization -or "" -eq $organization) {
@@ -25,15 +42,25 @@ function main {
 
     $actions = (.\load-used-actions.ps1 -orgName $organization -PAT $PAT)
 
-    # wite the file outside of the container so we can pick it up
+    # write the file outside of the container so we can pick it up
     Write-Host "Found [$($actions.Count)] actions "
     $jsonObject = ($actions | ConvertTo-Json -Depth 10 -Compress)    
     
     # store the json in a file and write the path to the output variable   
     $fileName = "used-actions.json"
     $filePath = "$($env:GITHUB_WORKSPACE)/$fileName"
-    
-    Set-Content -Value "$jsonObject" -Path "$filePath"
+
+    if ($null -ne $env:GITHUB_WORKSPACE -and "" -ne $env:GITHUB_WORKSPACE) {
+        Write-Host "Writing actions to file in workspace: [$($env:GITHUB_WORKSPACE)]"
+        Set-Content -Value "$jsonObject" -Path "$filePath"
+    }
+    else {
+        Write-Host "Writing actions to file in current folder: [$($pwd)]"
+        $filePath = "./used-actions.json"
+        Set-Content -Value "$jsonObject" -Path "$filePath"
+    }
+
+    # write the name of the file to the output folder
     Set-Content -Value "actions-file=$fileName" -Path $env:GITHUB_OUTPUT
     Write-Host "Stored actions in the actions output. Use $${{ steps.<step id>.outputs.actions }} in next action to load the json"
     Write-Host "Stored actions file in the actions output. Use $${{ steps.<step id>.outputs.actions-file }} in next action to load the file from the $$GITHUB_WORKSPACE folder"
@@ -42,20 +69,30 @@ function main {
     Add-Content -Value "actions='$jsonObject'" -Path $env:GITHUB_OUTPUT
 }
 
-try {
+$currentLocation = Get-Location
+try {    
     # always run in the correct location, where our scripts are located:
     Set-Location $PSScriptRoot
+    Import-EnvironmentVariables
 
     # call main script:
     main
+
+    Write-Host "Going back to location before the run: [$currentLocation]"
+    Set-Location $currentLocation
 
     # return the container with the exit code = Ok:    
     exit 0
 }
 catch {
     # return the container with the last exit code: 
+    $exitError = $_
     Write-Error "Error loading the actions:"
-    Write-Error $_
+    Write-Error $exitError
+
+    Write-Host "Going back to location before the run: [$currentLocation]"
+    Set-Location $currentLocation
+
     # return the container with an erroneous exit code:
     exit 1
 }

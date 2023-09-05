@@ -44,16 +44,36 @@ function  GetActionsFromWorkflow {
     foreach ($job in $parsedYaml["jobs"].GetEnumerator()) {
         Write-Host "  Job found: [$($job.Key)]"
         $steps=$job.Value.Item("steps")
-        foreach ($step in $steps) {
-            $uses=$step.Item("uses")
+        if ($null -ne $steps) {
+            foreach ($step in $steps) {
+                $uses=$step.Item("uses")
+                if ($null -ne $uses) {
+                    Write-Host "   Found action used: [$uses]"
+                    $actionLink = $uses.Split("@")[0]
+
+                    $data = [PSCustomObject]@{
+                        actionLink = $actionLink
+                        workflowFileName = $workflowFileName
+                        repo = $repo
+                        type = "action"
+                    }
+
+                    $actions += $data
+                }
+            }
+        }
+        else {
+            # check for reusable workflow
+            $uses = $job.Value.Item("uses")
             if ($null -ne $uses) {
-                Write-Host "   Found action used: [$uses]"
+                Write-Host "   Found reusable workflow used: [$uses]"
                 $actionLink = $uses.Split("@")[0]
 
                 $data = [PSCustomObject]@{
                     actionLink = $actionLink
                     workflowFileName = $workflowFileName
                     repo = $repo
+                    type = "reusable workflow"
                 }
 
                 $actions += $data
@@ -93,7 +113,7 @@ function GetAllUsedActionsFromRepo {
         }
         catch {
             Write-Warning "Error handling this workflow file:"
-            Write-Host $workflowFile | ConvertFrom-Json -Depth 10
+            Write-Host $workflowFile.Replace($PAT, "****") | ConvertFrom-Json -Depth 10
             Write-Warning "----------------------------------"
             Write-Host "Error: [$_]"
             Write-Warning "----------------------------------"
@@ -110,9 +130,9 @@ function SummarizeActionsUsed {
 
     $summarized =  @()
     foreach ($action in $actions) {
-        $found = $summarized | Where-Object { $_.actionLink -eq $action.actionLink }
+        $found = $summarized | Where-Object { $_.actionLink -eq $action.actionLink -And $_.type -eq $action.type } 
         if ($null -ne $found) {
-            # action already found, add this info to it
+            # item already found, add this info to it
             $newInfo =  [PSCustomObject]@{
                 repo = $action.repo
                 workflowFileName = $action.workflowFileName
@@ -122,8 +142,9 @@ function SummarizeActionsUsed {
             $found.count++
         }
         else {
-            # new action, create a new object
+            # new item, create a new object
             $newItem =  [PSCustomObject]@{
+                type = $action.type
                 actionLink = $action.actionLink
                 count = 1
                 workflows =  @(
@@ -131,7 +152,7 @@ function SummarizeActionsUsed {
                         repo = $action.repo
                         workflowFileName = $action.workflowFileName
                     }
-                )           
+                )
             }
             $summarized += $newItem
         }
@@ -150,7 +171,7 @@ function LoadAllUsedActionsFromRepos {
 
     # create hastable
     $actions = @()
-    $i=0
+    #$i=0
     foreach ($repo in $repos) {
         if ($null -ne $repo -And $repo.full_name.Length -gt 0) {
             Write-Host "Loading actions from repo: [$($repo.full_name)]"
@@ -160,12 +181,12 @@ function LoadAllUsedActionsFromRepos {
 
             # comment out code below to stop after a certain number of repos to prevent issues with 
             # rate limiting on the load file count (that is not workin correctly)
-
-            #$i++
-            #if ($i -eq 2) {
-            #    # break out on second result:
+            # $i++
+            # if ($i -eq 2) {
+            #    # break on second result:
+            #    Write-Host "Breaking after [$i] repos"
             #    return $actions
-            #}
+            # }
         }
     }
 
