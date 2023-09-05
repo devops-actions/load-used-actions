@@ -314,7 +314,7 @@ function GetRawFile {
         [string] $PAT
     )
 
-    Write-Host "Loading file content from url [$url]"
+    Write-Host "Loading file content from url [$($url.Replace($PAT, "****")))]"
     
     $Headers = Get-Headers -userName $userName -PAT $PAT
     $result = Invoke-WebRequest -Uri $url -Headers $Headers -Method Get -ErrorAction Stop | Select-Object -Expand Content
