@@ -117,6 +117,7 @@ function GetAllUsedActionsFromRepo {
             Write-Warning "----------------------------------"
             Write-Host "Error: [$_]"
             Write-Warning "----------------------------------"
+            continue
         }
     }
 
