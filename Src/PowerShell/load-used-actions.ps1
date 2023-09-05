@@ -35,7 +35,19 @@ function  GetActionsFromWorkflow {
     )
 
     # parse the workflow file and extract the actions used in it
-    $parsedYaml = ConvertFrom-Yaml $workflow
+    $parsedYaml =""
+    try {
+        $parsedYaml = ConvertFrom-Yaml $workflow
+    }
+    catch {
+        Write-Warning "Error parsing the yaml from this workflow file: [$workflowFileName] in repo: [$repo]"
+        Write-Warning "Workflow content:"
+        Write-Warning $workflow
+        Write-Warning ""
+        Write-Warning "Error:"
+        Write-Warning $_
+        return
+    }
 
     # create hastable
     $actions = @()
