@@ -76,6 +76,23 @@ function main {
     Add-Content -Value "actions='$jsonObject'" -Path $env:GITHUB_OUTPUT
 }
 
+if (Get-Module -ListAvailable -Name "powershell-yaml") {
+    Write-Host "powershell-yaml Module exists"
+} 
+else {
+    Write-Host "powershell-yaml Module does not exist"
+    Write-Host "Installing module for the yaml parsing"
+    Install-Module -Name $moduleName -Force -Scope CurrentUser -AllowClobber
+}
+
+try {
+    Import-Module powershell-yaml -Force
+}
+catch {
+    Write-Error "Error importing the powershell-yaml module"
+    throw
+}
+
 $currentLocation = Get-Location
 try {    
     # always run in the correct location, where our scripts are located:
