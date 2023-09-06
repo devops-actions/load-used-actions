@@ -81,7 +81,10 @@ if (Get-Module -ListAvailable -Name "powershell-yaml") {
 } 
 else {
     Write-Host "powershell-yaml Module does not exist"
+    Write-Host "Installing module for the yaml parsing"
+    Install-Module -Name $moduleName -Force -Scope CurrentUser -AllowClobber
 }
+Import-Module powershell-yaml -Force
 
 $currentLocation = Get-Location
 try {    

@@ -9,7 +9,6 @@ param (
 
 # pull in central calls library
 . $PSScriptRoot\github-calls.ps1
-. $PSScriptRoot\generic.ps1
 
 Write-Host "We're running with these parameters:"
 Write-Host "- PAT.Length: [$($PAT.Length)]"
