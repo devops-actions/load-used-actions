@@ -39,4 +39,12 @@ if ($null -eq $env:DOCKER -Or $false -eq $env:DOCKER -Or $env:DOCKER -eq "false"
 }
 else {
     Write-Host "Running in a container, [$moduleName] already installed in the base image"
+    # double check then!
+    $module = Get-Module -name $moduleName
+    if ($null -eq $module) {
+        Write-Host "Module [$moduleName] not found!"
+    }
+    else {
+        Write-Host "Module [$moduleName] found"
+    }
 }
