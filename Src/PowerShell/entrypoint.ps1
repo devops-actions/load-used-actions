@@ -84,7 +84,14 @@ else {
     Write-Host "Installing module for the yaml parsing"
     Install-Module -Name $moduleName -Force -Scope CurrentUser -AllowClobber
 }
-Import-Module powershell-yaml -Force
+
+try {
+    Import-Module powershell-yaml -Force
+}
+catch {
+    Write-Error "Error importing the powershell-yaml module"
+    throw
+}
 
 $currentLocation = Get-Location
 try {    
