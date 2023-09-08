@@ -315,6 +315,7 @@ function GetRawFile {
     )
 
     if ($null -eq $url) {
+        Write-Warning "Cannot handle empt url"
         return ""
     }
     $index = $url.IndexOf("?token=")
@@ -330,6 +331,8 @@ function GetRawFile {
         Write-Warning "Error: [$_]"
         return ""
     }
+
+    Write-Host "Got this result $requestResult"
 
     try {
         $result = $requestResult | Select-Object -Expand Content
