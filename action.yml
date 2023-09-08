@@ -13,8 +13,6 @@ inputs:
     description: 'Personal access token to use for analysis. Leaving this empty will use the default GITHUB_TOKEN that could have limited access rights'
     required: true 
 outputs:
-  actions:
-    description: 'List of all actions used in the organization'  
   actions-file:
     description: 'Location of the file containing the list of all actions used in the organization'
 runs:

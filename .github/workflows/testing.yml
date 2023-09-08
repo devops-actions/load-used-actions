@@ -22,21 +22,6 @@ jobs:
         id: load-actions
 
       - shell: pwsh
-        name: Check raw output    
-        run: |
-         $content = "${{ steps.load-actions.outputs.actions }}"
-         New-Item -Path 'actions.json' -Value $content -Force | Out-Null
-         $actions = $content | ConvertFrom-Json
-         if ($actions.Length -le 0) {
-            Set-Content -Value "No actions found" -Path $env:GITHUB_STEP_SUMMARY
-            throw "No actions found"
-         } 
-         else {
-            Write-Host "Found [$($actions.Length)] actions"
-            Set-Content -Value "Found [$($actions.Length)] actions" -Path $env:GITHUB_STEP_SUMMARY
-         }
-
-      - shell: pwsh
         name: check the output file location to contain the expected content
         run: |
           # check the output file location to contain the expected content
@@ -64,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Test on different organization
     env:
-      organization: rajbos-actions
+      organization: rajbos-actions-demo
     steps: 
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
@@ -74,21 +59,6 @@ jobs:
           PAT: ${{ secrets.GITHUB_TOKEN }}
           organization: ${{ env.organization }}
         id: load-actions
-
-      - shell: pwsh    
-        name: Check raw output
-        run: |
-         $content = "${{ steps.load-actions.outputs.actions }}"
-         New-Item -Path 'actions.json' -Value $content -Force | Out-Null
-         $actions = $content | ConvertFrom-Json
-         if ($actions.Length -le 0) {
-            Set-Content -Value "No actions found" -Path $env:GITHUB_STEP_SUMMARY
-            throw "No actions found"
-         } 
-         else {
-            Write-Host "Found [$($actions.Length)] actions"
-            Set-Content -Value "Found [$($actions.Length)] actions" -Path $env:GITHUB_STEP_SUMMARY
-         }
 
       - shell: pwsh
         name: check the output file location to contain the expected content
