@@ -321,7 +321,25 @@ function GetRawFile {
     Write-Host "Loading file content from url [$($url.Substring(0, $index)))]"
     
     $Headers = Get-Headers -userName $userName -PAT $PAT
-    $result = Invoke-WebRequest -Uri $url -Headers $Headers -Method Get -ErrorAction Stop | Select-Object -Expand Content
+    $requestResult
+    try {
+        $requestResult = Invoke-WebRequest -Uri $url -Headers $Headers -Method Get -ErrorAction Stop
+    }
+    catch {
+        Write-Warning "Error loading file content response from url [$($url.Substring(0, $index)))]"
+        Write-Warning "Error: [$_]"
+        return ""
+    }
+
+    try {
+        $result = $requestResult | Select-Object -Expand Content
+    }
+    catch {
+        Write-Warning "Error converting file content from url [$($url.Substring(0, $index)))]"
+        Write-Warning "Error: [$_]"
+        Write-Warning "Content: [$requestResult]"
+        return ""
+    }
 
     return $result
 }
