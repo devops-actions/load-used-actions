@@ -314,8 +314,9 @@ function GetRawFile {
         [string] $PAT
     )
 
+    Write-Host "GetRawFile: $url"
     if ($null -eq $url) {
-        Write-Warning "Cannot handle empt url"
+        Write-Warning "Cannot handle empty url"
         return ""
     }
     $index = $url.IndexOf("?token=")
