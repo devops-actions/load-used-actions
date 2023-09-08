@@ -21,7 +21,8 @@ jobs:
           PAT: ${{ secrets.GITHUB_TOKEN }}
         id: load-actions
 
-      - shell: pwsh        
+      - shell: pwsh
+        name: Check raw output    
         run: |
          $content = "${{ steps.load-actions.outputs.actions }}"
          New-Item -Path 'actions.json' -Value $content -Force | Out-Null
@@ -74,7 +75,8 @@ jobs:
           organization: ${{ env.organization }}
         id: load-actions
 
-      - shell: pwsh        
+      - shell: pwsh    
+        name: Check raw output
         run: |
          $content = "${{ steps.load-actions.outputs.actions }}"
          New-Item -Path 'actions.json' -Value $content -Force | Out-Null
