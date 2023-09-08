@@ -45,7 +45,7 @@ function  GetActionsFromWorkflow {
         Write-Warning ""
         Write-Warning "Error:"
         Write-Warning $_
-        return
+        return $actions
     }
 
     # create hashtable
