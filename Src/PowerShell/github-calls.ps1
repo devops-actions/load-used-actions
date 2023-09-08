@@ -327,8 +327,7 @@ function GetRawFile {
     else {
         $logUrl = $url
     }
-    Write-Host "Loading file content from url [$logUrl]"
-    
+   
     $Headers = Get-Headers -userName $userName -PAT $PAT
     $requestResult
     try {
@@ -339,8 +338,6 @@ function GetRawFile {
         Write-Warning "Error: [$_]"
         return ""
     }
-
-    Write-Host "Got this result $requestResult"
 
     try {
         $result = $requestResult | Select-Object -Expand Content

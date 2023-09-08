@@ -23,8 +23,7 @@ jobs:
 
       - shell: pwsh        
         run: |
-         Write-Host "Found actions [${{ steps.load-actions.outputs.actions }}]"
-         $content = ${{ steps.load-actions.outputs.actions }}
+         $content = "${{ steps.load-actions.outputs.actions }}"
          New-Item -Path 'actions.json' -Value $content -Force | Out-Null
          $actions = $content | ConvertFrom-Json
          if ($actions.Length -le 0) {
@@ -77,8 +76,7 @@ jobs:
 
       - shell: pwsh        
         run: |
-         Write-Host "Found actions [${{ steps.load-actions.outputs.actions }}]"
-         $content = ${{ steps.load-actions.outputs.actions }}
+         $content = "${{ steps.load-actions.outputs.actions }}"
          New-Item -Path 'actions.json' -Value $content -Force | Out-Null
          $actions = $content | ConvertFrom-Json
          if ($actions.Length -le 0) {
