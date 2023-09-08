@@ -314,6 +314,9 @@ function GetRawFile {
         [string] $PAT
     )
 
+    if ($null -eq $url) {
+        return ""
+    }
     $index = $url.IndexOf("?token=")
     Write-Host "Loading file content from url [$($url.Substring(0, $index)))]"
     
