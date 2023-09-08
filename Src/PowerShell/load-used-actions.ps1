@@ -51,6 +51,7 @@ function  GetActionsFromWorkflow {
     # create hashtable
     $actions = @()
     try {
+        Write-Host "Parsed yaml: $parsedYaml["jobs"]"
         if ($null -ne $parsedYaml["jobs"] -And "" -ne $parsedYaml["jobs"]) { #else: write info to summary?
             # go through the parsed yaml
             foreach ($job in $parsedYaml["jobs"].GetEnumerator()) {
