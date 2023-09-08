@@ -320,7 +320,14 @@ function GetRawFile {
         return ""
     }
     $index = $url.IndexOf("?token=")
-    Write-Host "Loading file content from url [$($url.Substring(0, $index)))]"
+    $logUrl 
+    if ($index -gt 0) {
+        $logUrl = $url.Substring(0, $index)
+    }
+    else {
+        $logUrl = $url
+    }
+    Write-Host "Loading file content from url [$logUrl]"
     
     $Headers = Get-Headers -userName $userName -PAT $PAT
     $requestResult
