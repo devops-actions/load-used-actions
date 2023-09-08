@@ -60,44 +60,67 @@ function  GetActionsFromWorkflow {
     }
 
     # go through the parsed yaml
-    foreach ($job in $parsedYaml["jobs"].GetEnumerator()) {
-        Write-Host "  Job found: [$($job.Key)]"
-        $steps=$job.Value.Item("steps")
-        if ($null -ne $steps) {
-            foreach ($step in $steps) {
-                $uses=$step.Item("uses")
-                if ($null -ne $uses) {
-                    Write-Host "   Found action used: [$uses]"
-                    $actionLink = $uses.Split("@")[0]
+    try {
+        if ($null -ne $parsedYaml["jobs"] -And "" -ne $parsedYaml["jobs"]) { #else: write info to summary?
+            # go through the parsed yaml
+            foreach ($job in $parsedYaml["jobs"].GetEnumerator()) {
+                Write-Host "  Job found: [$($job.Key)]"
+                $steps=$job.Value.Item("steps")
+                if ($null -ne $steps) {
+                    foreach ($step in $steps) {
+                        $uses=$step.Item("uses")
+                        if ($null -ne $uses) {
+                            Write-Host "   Found action used: [$uses]"
+                            $actionLink = $uses.Split("@")[0]
 
-                    $data = [PSCustomObject]@{
-                        actionLink = $actionLink
-                        workflowFileName = $workflowFileName
-                        repo = $repo
-                        type = "action"
+                            $data = [PSCustomObject]@{
+                                actionLink = $actionLink
+                                workflowFileName = $workflowFileName
+                                repo = $repo
+                                type = "action"
+                            }
+
+                            $actions += $data
+                        }
                     }
+                }
+                else {
+                    # check for reusable workflow
+                    $uses = $job.Value.Item("uses")
+                    if ($null -ne $uses) {
+                        Write-Host "   Found reusable workflow used: [$uses]"
+                        $actionLink = $uses.Split("@")[0]
 
-                    $actions += $data
+                        $data = [PSCustomObject]@{
+                            actionLink = $actionLink
+                            workflowFileName = $workflowFileName
+                            repo = $repo
+                            type = "reusable workflow"
+                        }
+
+                        $actions += $data
+                    }
                 }
             }
         }
-        else {
-            # check for reusable workflow
-            $uses = $job.Value.Item("uses")
-            if ($null -ne $uses) {
-                Write-Host "   Found reusable workflow used: [$uses]"
-                $actionLink = $uses.Split("@")[0]
+    }
+    catch {
+        Write-Warning "Error handling this workflow file [$($workflowFile.name)] in repo [$repo] after parsing it"
+        Write-Host "Error: [$_]"
+        Write-Host "$parsedYaml"
 
-                $data = [PSCustomObject]@{
-                    actionLink = $actionLink
-                    workflowFileName = $workflowFileName
-                    repo = $repo
-                    type = "reusable workflow"
-                }
-
-                $actions += $data
+        if ($null -ne $env:GITHUB_STEP_SUMMARY) {
+            $filename = "$env:GITHUB_STEP_SUMMARY"
+            $content = Get-Content $filename
+            if ($null -eq $content -Or "" -eq $content) {
+                Add-Content -path $filename "# Error handling workflow file(s)"
+                Add-Content -path $filename "|Repository|Workflow file|Error|"
+                Add-Content -path $filename "|---|---|---|"
             }
+
+            Add-Content -path $filename "| $repo | $($workflowFile.name) | $_ |"
         }
+
     }
 
     return $actions
