@@ -33,21 +33,10 @@ function  GetActionsFromWorkflow {
         [string] $repo
     )
 
-    # create hastable
-    $actions = @()
-    if ($workflow.Length -lt 25 -Or !$workflow.Contains("on") -Or !$workflow.Contains("jobs")) {
-      Write-Host "Worflow [$workflowFileName] from repo [$repo] content is less then 20 characters, cannot be a valid document, so skipping it" 
-      return $actions
-    }
-    
     # parse the workflow file and extract the actions used in it
     $parsedYaml =""
     try {
         $parsedYaml = ConvertFrom-Yaml $workflow
-        
-        if ($null -eq $parsedYaml -Or $parsedYaml.Length -eq 0) {
-          return $actions
-        }        
     }
     catch {
         Write-Warning "Error parsing the yaml from this workflow file: [$workflowFileName] in repo: [$repo]"
@@ -56,10 +45,11 @@ function  GetActionsFromWorkflow {
         Write-Warning ""
         Write-Warning "Error:"
         Write-Warning $_
-        return $actions
+        return
     }
 
-    # go through the parsed yaml
+    # create hashtable
+    $actions = @()
     try {
         if ($null -ne $parsedYaml["jobs"] -And "" -ne $parsedYaml["jobs"]) { #else: write info to summary?
             # go through the parsed yaml
@@ -159,7 +149,7 @@ function GetAllUsedActionsFromRepo {
             Write-Warning "----------------------------------"
             Write-Host "Error: [$_]"
             Write-Warning "----------------------------------"
-            #continue # continue breaks with an error and does not really continue
+            #continue
         }
     }
 
