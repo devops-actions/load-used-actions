@@ -21,10 +21,11 @@ jobs:
         with: 
           PAT: ${{ secrets.GITHUB_TOKEN }}
         id: load-actions
+
       - shell: pwsh        
         run: |
-         Write-Host "Found actions [${{ steps.load-actions.outputs.actions }}]"
-         $content = ${{ steps.load-actions.outputs.actions }}
+         Write-Host "Found actions [${{ steps.load-actions.outputs.actions-file }}]"
+         $content = ${{ steps.load-actions.outputs.actions-file }}
          New-Item -Path 'actions.json' -Value $content -Force | Out-Null
          $actions = $content | ConvertFrom-Json
          if ($actions.Length -le 0) {
@@ -67,6 +68,7 @@ jobs:
             Release ${{ github.ref }} is available now
 
       # todo: figure out how this works with an action :-)
+      # does not work, as you cannot set the flag to publish the action to the marketplace
       #- uses: actions/publish-release-asset@v2
         #with:
           #upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 

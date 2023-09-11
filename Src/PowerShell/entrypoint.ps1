@@ -47,7 +47,14 @@ function main {
         throw
     }
 
-    $actions = (.\load-used-actions.ps1 -orgName $organization -PAT $PAT)
+    echo $pwd
+    ls 
+
+    # pull in the methods from load-actions:
+    . $PSScriptRoot\load-used-actions.ps1 -orgName $organization -PAT $PAT
+
+    # Get all actions
+    $actions = LoadAllActionsFromConfiguration
 
     # write the file outside of the container so we can pick it up
     Write-Host "Found [$($actions.Count)] actions "

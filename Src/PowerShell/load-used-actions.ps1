@@ -10,21 +10,6 @@ param (
 # pull in central calls library
 . $PSScriptRoot\github-calls.ps1
 
-Write-Host "We're running with these parameters:"
-Write-Host "- PAT.Length: [$($PAT.Length)]"
-Write-Host "- orgName: [$orgName]"
-
-if ($null -eq $userName -or "" -eq $userName) {
-    $userName = $env:GITHUB_ACTOR
-}
-
-if ($userName -eq "dependabot[bot]") {
-    # try to prevent issues with [] in the username
-    $userName = "dependabot"
-}
-
-Write-Host "- userName: [$userName]"
-Write-Host "- marketplaceRepo: [$marketplaceRepo]"
 
 function  GetActionsFromWorkflow {
     param (
@@ -45,51 +30,72 @@ function  GetActionsFromWorkflow {
         Write-Warning ""
         Write-Warning "Error:"
         Write-Warning $_
-        return
+        return $actions
     }
 
-    # create hastable
+    # create hashtable
     $actions = @()
+    try {
+        if ($null -ne $parsedYaml["jobs"] -And "" -ne $parsedYaml["jobs"]) { #else: write info to summary?
+            # go through the parsed yaml
+            foreach ($job in $parsedYaml["jobs"].GetEnumerator()) {
+                Write-Host "  Job found: [$($job.Key)]"
+                $steps=$job.Value.Item("steps")
+                if ($null -ne $steps) {
+                    foreach ($step in $steps) {
+                        $uses=$step.Item("uses")
+                        if ($null -ne $uses) {
+                            Write-Host "   Found action used: [$uses]"
+                            $actionLink = $uses.Split("@")[0]
 
-    # go through the parsed yaml
-    foreach ($job in $parsedYaml["jobs"].GetEnumerator()) {
-        Write-Host "  Job found: [$($job.Key)]"
-        $steps=$job.Value.Item("steps")
-        if ($null -ne $steps) {
-            foreach ($step in $steps) {
-                $uses=$step.Item("uses")
-                if ($null -ne $uses) {
-                    Write-Host "   Found action used: [$uses]"
-                    $actionLink = $uses.Split("@")[0]
+                            $data = [PSCustomObject]@{
+                                actionLink = $actionLink
+                                workflowFileName = $workflowFileName
+                                repo = $repo
+                                type = "action"
+                            }
 
-                    $data = [PSCustomObject]@{
-                        actionLink = $actionLink
-                        workflowFileName = $workflowFileName
-                        repo = $repo
-                        type = "action"
+                            $actions += $data
+                        }
                     }
+                }
+                else {
+                    # check for reusable workflow
+                    $uses = $job.Value.Item("uses")
+                    if ($null -ne $uses) {
+                        Write-Host "   Found reusable workflow used: [$uses]"
+                        $actionLink = $uses.Split("@")[0]
 
-                    $actions += $data
+                        $data = [PSCustomObject]@{
+                            actionLink = $actionLink
+                            workflowFileName = $workflowFileName
+                            repo = $repo
+                            type = "reusable workflow"
+                        }
+
+                        $actions += $data
+                    }
                 }
             }
         }
-        else {
-            # check for reusable workflow
-            $uses = $job.Value.Item("uses")
-            if ($null -ne $uses) {
-                Write-Host "   Found reusable workflow used: [$uses]"
-                $actionLink = $uses.Split("@")[0]
+    }
+    catch {
+        Write-Warning "Error handling this workflow file [$($workflowFile.name)] in repo [$repo] after parsing it"
+        Write-Host "Error: [$_]"
+        Write-Host "$parsedYaml"
 
-                $data = [PSCustomObject]@{
-                    actionLink = $actionLink
-                    workflowFileName = $workflowFileName
-                    repo = $repo
-                    type = "reusable workflow"
-                }
-
-                $actions += $data
+        if ($null -ne $env:GITHUB_STEP_SUMMARY) {
+            $filename = "$env:GITHUB_STEP_SUMMARY"
+            $content = Get-Content $filename
+            if ($null -eq $content -Or "" -eq $content) {
+                Add-Content -path $filename "# Error handling workflow file(s)"
+                Add-Content -path $filename "|Repository|Workflow file|Error|"
+                Add-Content -path $filename "|---|---|---|"
             }
+
+            Add-Content -path $filename "| $repo | $($workflowFile.name) | $_ |"
         }
+
     }
 
     return $actions
@@ -116,7 +122,7 @@ function GetAllUsedActionsFromRepo {
     foreach ($workflowFile in $workflowFiles) {
         try {
             if ($null -ne $workflowFile.download_url -and $workflowFile.download_url.Length -gt 0 -and $workflowFile.download_url.Split("?")[0].EndsWith(".yml")) { 
-                $workflow = GetRawFile -url $workflowFile.download_url -PAT $PAT
+                $workflow = GetRawFile -url $workflowFile.download_url -PAT $PAT -userName $userName
                 $actions = GetActionsFromWorkflow -workflow $workflow -workflowFileName $workflowFile.name -repo $repo
 
                 $actionsInRepo += $actions
@@ -128,7 +134,7 @@ function GetAllUsedActionsFromRepo {
             Write-Warning "----------------------------------"
             Write-Host "Error: [$_]"
             Write-Warning "----------------------------------"
-            continue
+            #continue
         }
     }
 
@@ -205,7 +211,23 @@ function LoadAllUsedActionsFromRepos {
     return $actions
 }
 
-function main() {
+function LoadAllActionsFromConfiguration() {
+
+    Write-Host "We're running with these parameters:"
+    Write-Host "- PAT.Length: [$($PAT.Length)]"
+    Write-Host "- orgName: [$orgName]"
+
+    if ($null -eq $userName -or "" -eq $userName) {
+        $userName = $env:GITHUB_ACTOR
+    }
+
+    if ($userName -eq "dependabot[bot]") {
+        # try to prevent issues with [] in the username
+        $userName = "dependabot"
+    }
+
+    Write-Host "- userName: [$userName]"
+    Write-Host "- marketplaceRepo: [$marketplaceRepo]"
 
     # get all repos in an org
     $repos = FindAllRepos -orgName $orgName -userName $userName -PAT $PAT
@@ -234,6 +256,3 @@ function main() {
 
     return $summarizeActions
 }
-
-$actions = main
-return $actions

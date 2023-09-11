@@ -14,7 +14,7 @@
 		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
 
-	"postCreateCommand": "sudo chsh vscode -s \"$(which pwsh)\"",
+	"postCreateCommand": "sudo chsh vscode -s \"$(which pwsh)\"; ./.devcontainer/postCreateCommand.ps1",
 
 	// Configure tool-specific properties.
 	"customizations": {

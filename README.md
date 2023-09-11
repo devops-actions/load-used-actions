@@ -40,13 +40,13 @@ jobs:
           PAT: ${{ secrets.GITHUB_TOKEN }} # use an Access Token with correct permissions to view private repos if you need to
 
       - shell: pwsh        
-        name: Store json file
-        run: echo ${{ steps.load-actions.outputs.actions }} > 'actions.json'
+        name: Show json file
+        run: cat ${{ steps.load-actions.outputs.actions-file }}
             
       - name: Upload result file as artefact
         uses: actions/upload-artifact@v2
         with: 
-          name: actions
+          name: actions-file
           path: actions.json
 ```
 
@@ -57,7 +57,7 @@ jobs:
 |PAT|The Personal Access Token to use for the API calls.|
 
 ## Outputs
-actions: a compressed json string with all the actions used in the workflows in the organization. The json is in the format:
+actions-file: path to file containing compressed json string with all the actions used in the workflows in the organization. The json is in the format:
 ``` json
 [
     "actionLink": "actions/checkout",
