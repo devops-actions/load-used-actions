@@ -9,6 +9,23 @@ on:
 permissions: read-all
 
 jobs:
+  run-pester-tests:
+    runs-on: ubuntu-latest
+    name: Run Pester tests
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+
+      - name: Execute tests
+        shell: pwsh
+        run: |
+          $testResults = Invoke-Pester -OutputFormat NUnitXml -OutputFile testResults.xml -PassThru -EnableExit
+          if ($testResults.FailedCount -gt 0) {
+            throw "Tests failed"
+          }
+          else {
+            Write-Host "Tests passed"
+          }
+
   load-all-used-actions:
     runs-on: ubuntu-latest
     name: Test on current organization
