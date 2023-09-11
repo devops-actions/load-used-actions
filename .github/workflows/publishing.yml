@@ -21,10 +21,11 @@ jobs:
         with: 
           PAT: ${{ secrets.GITHUB_TOKEN }}
         id: load-actions
+
       - shell: pwsh        
         run: |
          Write-Host "Found actions [${{ steps.load-actions.outputs.actions-file }}]"
-         $content = ${{ steps.load-actions.outputs.actions }}
+         $content = ${{ steps.load-actions.outputs.actions-file }}
          New-Item -Path 'actions.json' -Value $content -Force | Out-Null
          $actions = $content | ConvertFrom-Json
          if ($actions.Length -le 0) {
