@@ -18,6 +18,11 @@ jobs:
       - name: Execute tests
         shell: pwsh
         run: |
+          # install powershell-yaml as it is not on the runners by default
+          $moduleName = "powershell-yaml"
+          Install-Module -Name $moduleName -Force -Scope CurrentUser -AllowClobber
+
+          # execute tests
           $testResults = Invoke-Pester -OutputFormat NUnitXml -OutputFile testResults.xml -PassThru -EnableExit
           if ($testResults.FailedCount -gt 0) {
             throw "Tests failed"
