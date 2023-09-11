@@ -44,7 +44,7 @@ Describe "Test conversion with normal indentation" {
         $content = Get-Content "Tests/Files/rajbos-actions-demo_deploy-cloudrun.yml" -Raw
         $result = ConvertFrom-Yaml $content
 
-        $jobCount = 0
+        $jobCount = -1
         foreach ($job in $result["jobs"].GetEnumerator()) {
             $jobCount++
 
@@ -54,7 +54,7 @@ Describe "Test conversion with normal indentation" {
                 $stepLength++    
             }
             switch ($jobCount) {
-                0 { $stepLength | Should -Be 5 -Because "$($job.Key) should have 5 steps"}
+                0 { $stepLength | Should -Be 7 -Because "$($job.Key) should have 5 steps"}
                 1 { $stepLength | Should -Be 7 -Because "$($job.Key) should have 7 steps" }
                 2 { $stepLength | Should -Be 7 -Because "$($job.Key) should have 7 steps" }
                 3 { $stepLength | Should -Be 2 -Because "$($job.Key) should have 2 steps" }
