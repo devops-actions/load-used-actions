@@ -10,21 +10,6 @@ param (
 # pull in central calls library
 . $PSScriptRoot\github-calls.ps1
 
-Write-Host "We're running with these parameters:"
-Write-Host "- PAT.Length: [$($PAT.Length)]"
-Write-Host "- orgName: [$orgName]"
-
-if ($null -eq $userName -or "" -eq $userName) {
-    $userName = $env:GITHUB_ACTOR
-}
-
-if ($userName -eq "dependabot[bot]") {
-    # try to prevent issues with [] in the username
-    $userName = "dependabot"
-}
-
-Write-Host "- userName: [$userName]"
-Write-Host "- marketplaceRepo: [$marketplaceRepo]"
 
 function  GetActionsFromWorkflow {
     param (
@@ -51,7 +36,6 @@ function  GetActionsFromWorkflow {
     # create hashtable
     $actions = @()
     try {
-        Write-Host "Parsed yaml: $parsedYaml["jobs"]"
         if ($null -ne $parsedYaml["jobs"] -And "" -ne $parsedYaml["jobs"]) { #else: write info to summary?
             # go through the parsed yaml
             foreach ($job in $parsedYaml["jobs"].GetEnumerator()) {
@@ -227,7 +211,23 @@ function LoadAllUsedActionsFromRepos {
     return $actions
 }
 
-function main() {
+function LoadAllActionsFromConfiguration() {
+
+    Write-Host "We're running with these parameters:"
+    Write-Host "- PAT.Length: [$($PAT.Length)]"
+    Write-Host "- orgName: [$orgName]"
+
+    if ($null -eq $userName -or "" -eq $userName) {
+        $userName = $env:GITHUB_ACTOR
+    }
+
+    if ($userName -eq "dependabot[bot]") {
+        # try to prevent issues with [] in the username
+        $userName = "dependabot"
+    }
+
+    Write-Host "- userName: [$userName]"
+    Write-Host "- marketplaceRepo: [$marketplaceRepo]"
 
     # get all repos in an org
     $repos = FindAllRepos -orgName $orgName -userName $userName -PAT $PAT
@@ -256,6 +256,3 @@ function main() {
 
     return $summarizeActions
 }
-
-$actions = main
-return $actions

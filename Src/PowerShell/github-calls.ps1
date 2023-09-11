@@ -1,4 +1,3 @@
-
 function Get-Headers {
     param (        
         [string] $userName,
@@ -311,8 +310,19 @@ function FindAllRepos {
 function GetRawFile {
     param (
         [string] $url,
-        [string] $PAT
+        [string] $PAT,
+        [string] $userName
     )
+
+    if ($null -eq $PAT -or $PAT.Length -eq 0) {
+        Write-Warning "Cannot handle empty PAT"
+        return ""
+    }
+
+    if ($null -eq $userName -or $userName.Length -eq 0) {
+        Write-Warning "Cannot handle empty userName"
+        return ""
+    }
 
     Write-Host "GetRawFile: $url"
     if ($null -eq $url) {
@@ -320,7 +330,7 @@ function GetRawFile {
         return ""
     }
     $index = $url.IndexOf("?token=")
-    $logUrl 
+    $logUrl = "" 
     if ($index -gt 0) {
         $logUrl = $url.Substring(0, $index)
     }
@@ -329,12 +339,12 @@ function GetRawFile {
     }
    
     $Headers = Get-Headers -userName $userName -PAT $PAT
-    $requestResult
+    $requestResult = ""
     try {
         $requestResult = Invoke-WebRequest -Uri $url -Headers $Headers -Method Get -ErrorAction Stop
     }
     catch {
-        Write-Warning "Error loading file content response from url [$($url.Substring(0, $index)))]"
+        Write-Warning "Error loading file content response from url [$($logUrl)]"
         Write-Warning "Error: [$_]"
         return ""
     }
@@ -343,7 +353,7 @@ function GetRawFile {
         $result = $requestResult | Select-Object -Expand Content
     }
     catch {
-        Write-Warning "Error converting file content from url [$($url.Substring(0, $index)))]"
+        Write-Warning "Error converting file content from url [$($logUrl)]"
         Write-Warning "Error: [$_]"
         Write-Warning "Content: [$requestResult]"
         return ""
