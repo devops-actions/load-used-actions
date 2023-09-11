@@ -44,7 +44,7 @@ Describe "Test conversion with normal indentation" {
         $content = Get-Content "Tests/Files/rajbos-actions-demo_deploy-cloudrun.yml" -Raw
         $result = ConvertFrom-Yaml $content
 
-        $jobCount = -1
+        $jobCount = 0
         foreach ($job in $result["jobs"].GetEnumerator()) {
             $jobCount++
 
@@ -53,11 +53,11 @@ Describe "Test conversion with normal indentation" {
             foreach ($step in $steps) {
                 $stepLength++    
             }
-            switch ($jobCount) {
-                0 { $stepLength | Should -Be 7 -Because "$($job.Key) should have 5 steps"}
-                1 { $stepLength | Should -Be 7 -Because "$($job.Key) should have 7 steps" }
-                2 { $stepLength | Should -Be 7 -Because "$($job.Key) should have 7 steps" }
-                3 { $stepLength | Should -Be 2 -Because "$($job.Key) should have 2 steps" }
+            switch ($job.Key) { # jobs are not ordered as in the file
+                "gcloud"   { $stepLength | Should -Be 7 -Because "$($job.Key) should have 5 steps"}
+                "b64_json" { $stepLength | Should -Be 7 -Because "$($job.Key) should have 7 steps" }
+                "json"     { $stepLength | Should -Be 7 -Because "$($job.Key) should have 7 steps" }
+                "cleanup"  { $stepLength | Should -Be 2 -Because "$($job.Key) should have 2 steps" }
             }
         }
         $jobCount | Should -Be 4
