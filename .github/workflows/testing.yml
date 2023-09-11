@@ -48,7 +48,7 @@ jobs:
         id: load-actions
 
       - shell: pwsh
-        name: check the output file location to contain the expected content
+        name: Check the output file location to contain the expected content
         run: |
           # check the output file location to contain the expected content
           Write-Host "Got actions file location here [${{ steps.load-actions.outputs.actions-file }}]"
@@ -87,7 +87,7 @@ jobs:
         id: load-actions
 
       - shell: pwsh
-        name: check the output file location to contain the expected content
+        name: Check the output file location to contain the expected content
         run: |
           # check the output file location to contain the expected content
           Write-Host "Got actions file location here [${{ steps.load-actions.outputs.actions-file }}]"
