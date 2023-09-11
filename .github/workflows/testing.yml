@@ -20,6 +20,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # execute Pester tests
+
           # install powershell-yaml as it is not on the runners by default
           $moduleName = "powershell-yaml"
           Install-Module -Name $moduleName -Force -Scope CurrentUser -AllowClobber
