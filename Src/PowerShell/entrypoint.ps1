@@ -47,6 +47,9 @@ function main {
         throw
     }
 
+    echo $pwd
+    ls 
+    
     # pull in the methods from load-actions:
     .\load-used-actions.ps1 -orgName $organization -PAT $PAT
 
