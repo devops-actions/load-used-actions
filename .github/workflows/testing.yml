@@ -17,13 +17,15 @@ jobs:
 
       - name: Execute tests
         shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # install powershell-yaml as it is not on the runners by default
           $moduleName = "powershell-yaml"
           Install-Module -Name $moduleName -Force -Scope CurrentUser -AllowClobber
 
           # execute tests
-          $testResults = Invoke-Pester -OutputFormat NUnitXml -OutputFile testResults.xml -PassThru -EnableExit
+          $testResults = Invoke-Pester
           if ($testResults.FailedCount -gt 0) {
             throw "Tests failed"
           }
