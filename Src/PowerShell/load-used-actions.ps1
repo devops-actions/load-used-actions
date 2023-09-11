@@ -122,7 +122,7 @@ function GetAllUsedActionsFromRepo {
     foreach ($workflowFile in $workflowFiles) {
         try {
             if ($null -ne $workflowFile.download_url -and $workflowFile.download_url.Length -gt 0 -and $workflowFile.download_url.Split("?")[0].EndsWith(".yml")) { 
-                $workflow = GetRawFile -url $workflowFile.download_url -PAT $PAT
+                $workflow = GetRawFile -url $workflowFile.download_url -PAT $PAT -userName $userName
                 $actions = GetActionsFromWorkflow -workflow $workflow -workflowFileName $workflowFile.name -repo $repo
 
                 $actionsInRepo += $actions
