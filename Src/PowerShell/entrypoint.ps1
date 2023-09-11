@@ -49,9 +49,9 @@ function main {
 
     echo $pwd
     ls 
-    
+
     # pull in the methods from load-actions:
-    .\load-used-actions.ps1 -orgName $organization -PAT $PAT
+    . $PSScriptRoot\load-used-actions.ps1 -orgName $organization -PAT $PAT
 
     # Get all actions
     $actions = LoadAllActionsFromConfiguration
