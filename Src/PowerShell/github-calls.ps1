@@ -324,7 +324,6 @@ function GetRawFile {
         return ""
     }
 
-    Write-Host "GetRawFile: $url"
     if ($null -eq $url) {
         Write-Warning "Cannot handle empty url"
         return ""
