@@ -10,7 +10,6 @@ param (
 # pull in central calls library
 . $PSScriptRoot\github-calls.ps1
 
-
 function  GetActionsFromWorkflow {
     param (
         [string] $workflow,
@@ -252,7 +251,9 @@ function LoadAllActionsFromConfiguration() {
 
         # todo: store the json file
         #UploadActionsDataToGitHub -actions $actionsFound -marketplaceRepo $marketplaceRepo -PAT $PAT -repositoryName $repositoryName -repositoryOwner $repositoryOwner
+        
+        return $summarizeActions
     }
 
-    return $summarizeActions
+    return $null
 }

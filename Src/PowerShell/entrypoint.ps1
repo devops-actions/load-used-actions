@@ -55,9 +55,13 @@ function main {
 
     # Get all actions
     $actions = LoadAllActionsFromConfiguration
+    if ($null -eq $actions) {
+        Write-Error "Could not find any actions"
+        throw
+    }
 
     # write the file outside of the container so we can pick it up
-    Write-Host "Found [$($actions.Count)] actions "
+    Write-Host "Found [$($actions.Count)] actions"
     $jsonObject = ($actions | ConvertTo-Json -Depth 10 -Compress)    
     
     # store the json in a file and write the path to the output variable   
