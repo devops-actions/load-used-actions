@@ -46,9 +46,11 @@ function  GetActionsFromWorkflow {
                         if ($null -ne $uses) {
                             Write-Host "   Found action used: [$uses]"
                             $actionLink = $uses.Split("@")[0]
+                            $actionRef = $uses.Split("@")[1]
 
                             $data = [PSCustomObject]@{
                                 actionLink = $actionLink
+                                actionRef = $actionRef
                                 workflowFileName = $workflowFileName
                                 repo = $repo
                                 type = "action"
@@ -64,9 +66,11 @@ function  GetActionsFromWorkflow {
                     if ($null -ne $uses) {
                         Write-Host "   Found reusable workflow used: [$uses]"
                         $actionLink = $uses.Split("@")[0]
+                        $actionRef = $uses.Split("@")[1]
 
                         $data = [PSCustomObject]@{
                             actionLink = $actionLink
+                            actionRef = $actionRef
                             workflowFileName = $workflowFileName
                             repo = $repo
                             type = "reusable workflow"
@@ -147,7 +151,7 @@ function SummarizeActionsUsed {
 
     $summarized =  @()
     foreach ($action in $actions) {
-        $found = $summarized | Where-Object { $_.actionLink -eq $action.actionLink -And $_.type -eq $action.type } 
+        $found = $summarized | Where-Object { $_.actionLink -eq $action.actionLink -And $_.actionRef -eq $action.actionRef -And $_.type -eq $action.type }
         if ($null -ne $found) {
             # item already found, add this info to it
             $newInfo =  [PSCustomObject]@{
@@ -163,6 +167,7 @@ function SummarizeActionsUsed {
             $newItem =  [PSCustomObject]@{
                 type = $action.type
                 actionLink = $action.actionLink
+                actionRef = $action.actionRef
                 count = 1
                 workflows =  @(
                     [PSCustomObject]@{
