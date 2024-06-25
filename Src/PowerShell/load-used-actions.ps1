@@ -114,7 +114,7 @@ function GetAllUsedActionsFromRepo {
         return;
     }
     
-    # create hastable to store the results in
+    # create hashtable to store the results in
     $actionsInRepo = @()
 
     Write-Host "Found [$($workflowFiles.Length)] files in the workflows directory"
