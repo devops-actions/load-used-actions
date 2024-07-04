@@ -14,7 +14,7 @@ jobs:
   test-local-action:
     runs-on: ubuntu-latest
     steps: 
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - uses: ./
         name: Load used actions
@@ -36,7 +36,7 @@ jobs:
          }
             
       - name: Upload result file as artefact
-        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with: 
           name: actions
           path: actions.json
@@ -50,7 +50,7 @@ jobs:
       
       - name: Get tag value
         id: tag
-        uses: devops-actions/action-get-tag@6787980b5b0227cf34a8d845db08fb23514238e0 # v1.0.1
+        uses: devops-actions/action-get-tag@6167776d96bd5da05da534aa9cea6d7c786c1c5a # v1.0.1
         
       - name: Use tag
         run: echo ${{ steps.tag.outputs.tag }}
