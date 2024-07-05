@@ -65,8 +65,9 @@ function  GetActionsFromWorkflow {
                     $uses = $job.Value.Item("uses")
                     if ($null -ne $uses) {
                         Write-Host "   Found reusable workflow used: [$uses]"
-                        $actionLink = $uses.Split("@")[0]
-                        $actionRef = $uses.Split("@")[1]
+                        $splitted = $uses.Split("@")
+                        $actionLink = $splitted[0]
+                        $actionRef = $splitted[1]
 
                         $data = [PSCustomObject]@{
                             actionLink = $actionLink
