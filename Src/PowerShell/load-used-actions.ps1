@@ -45,8 +45,9 @@ function  GetActionsFromWorkflow {
                         $uses=$step.Item("uses")
                         if ($null -ne $uses) {
                             Write-Host "   Found action used: [$uses]"
-                            $actionLink = $uses.Split("@")[0]
-                            $actionRef = $uses.Split("@")[1]
+                            $splitted = $uses.Split("@")
+                            $actionLink = $splitted[0]
+                            $actionRef = $splitted[1]
 
                             $data = [PSCustomObject]@{
                                 actionLink = $actionLink
