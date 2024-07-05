@@ -169,12 +169,12 @@ function SummarizeActionsUsed {
             $newItem =  [PSCustomObject]@{
                 type = $action.type
                 actionLink = $action.actionLink
-                actionRef = $action.actionRef
                 count = 1
                 workflows =  @(
                     [PSCustomObject]@{
                         repo = $action.repo
                         workflowFileName = $action.workflowFileName
+                        actionRef = $action.actionRef
                     }
                 )
             }
