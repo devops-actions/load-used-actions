@@ -2,7 +2,7 @@ name: Testing the action
 
 on: 
   push: 
-
+  pull_request:
   workflow_dispatch:
     
 # Declare default GITHUB_TOKEN permissions as read only.
