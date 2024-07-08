@@ -48,11 +48,13 @@ function  GetActionsFromWorkflow {
                             $splitted = $uses.Split("@")
                             $actionLink = $splitted[0]
                             $actionRef = $splitted[1]
+                            $actionVersionComment = $splitted[2]
 
                             $data = [PSCustomObject]@{
                                 actionLink = $actionLink
                                 actionRef = $actionRef
-                                workflowFileName = $workflowFileName
+                                actionVersionComment = $actionVersionComment
+                                workflowFileName = $workflowFileName                                
                                 repo = $repo
                                 type = "action"
                             }
@@ -69,10 +71,12 @@ function  GetActionsFromWorkflow {
                         $splitted = $uses.Split("@")
                         $actionLink = $splitted[0]
                         $actionRef = $splitted[1]
+                        $actionVersionComment = $splitted[2]
 
                         $data = [PSCustomObject]@{
                             actionLink = $actionLink
                             actionRef = $actionRef
+                            actionVersionComment = $actionVersionComment
                             workflowFileName = $workflowFileName
                             repo = $repo
                             type = "reusable workflow"
@@ -160,6 +164,7 @@ function SummarizeActionsUsed {
                 repo = $action.repo
                 workflowFileName = $action.workflowFileName
                 actionRef = $action.actionRef
+                actionVersionComment = $action.actionVersionComment
             }
 
             $found.workflows += $newInfo
@@ -176,6 +181,7 @@ function SummarizeActionsUsed {
                         repo = $action.repo
                         workflowFileName = $action.workflowFileName
                         actionRef = $action.actionRef
+                        actionVersionComment = $action.actionVersionComment
                     }
                 )
             }
