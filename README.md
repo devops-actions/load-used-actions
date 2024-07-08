@@ -12,7 +12,7 @@ Used for inserting data into the [internal actions marketplace](https://github.c
 Minimal uses expression to use this action:
 
 ``` yaml
-uses: devops-actions/load-used-actions@v1.0.0
+uses: devops-actions/load-used-actions@v1.3.6
 with: 
     PAT: ${{ secrets.GITHUB_TOKEN }} # use an Access Token with correct permissions to view private repos if you need to
 ```
@@ -33,7 +33,7 @@ jobs:
   load-all-used-actions:
     runs-on: ubuntu-latest
     steps: 
-      - uses: devops-actions/load-used-actions@v1.0.0
+      - uses: devops-actions/load-used-actions@v1.3.6
         name: Load used actions        
         id: load-actions
         with: 
@@ -44,7 +44,7 @@ jobs:
         run: cat ${{ steps.load-actions.outputs.actions-file }}
             
       - name: Upload result file as artefact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: actions-file
           path: ${{ steps.load-actions.outputs.actions-file }}
@@ -65,7 +65,15 @@ actions-file: path to file containing compressed json string with all the action
     "workflows": [
         {
             "repo": "rajbos/actions-marketplace",
-            "workflowFileName": "build-image.yml"
+            "workflowFileName": "build-image.yml",
+            "actionRef": "v3" # the 'version' of the reference being used, if any
+            "actionVersionComment": null # the comment after the version, if any
+        },
+        {
+            "repo": "rajbos/actions-marketplace",
+            "workflowFileName": "build-image.yml",
+            "actionRef": "6167776d96bd5da05da534aa9cea6d7c786c1c5a", # the 'version' of the reference being used, if any
+            "actionVersionComment": "v3" # the comment after the 'version', if any
         },
         { "etc" : "--" }
     ]
@@ -83,3 +91,5 @@ The workflow object has the following properties:
 |----|-----------|
 |repo|The name of the repository that uses the action|
 |workflowFileName|The name of the workflow file that was found in the directory `.github/workflows/`|
+|actionRef| The 'version' of the reference being used, if any|
+|actionVersionComment| The comment after the  version', if any|
