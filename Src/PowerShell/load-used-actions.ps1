@@ -45,10 +45,13 @@ function  GetActionsFromWorkflow {
                         $uses=$step.Item("uses")
                         if ($null -ne $uses) {
                             Write-Host "   Found action used: [$uses]"
-                            $actionLink = $uses.Split("@")[0]
+                            $splitted = $uses.Split("@")
+                            $actionLink = $splitted[0]
+                            $actionRef = $splitted[1]
 
                             $data = [PSCustomObject]@{
                                 actionLink = $actionLink
+                                actionRef = $actionRef
                                 workflowFileName = $workflowFileName
                                 repo = $repo
                                 type = "action"
@@ -63,10 +66,13 @@ function  GetActionsFromWorkflow {
                     $uses = $job.Value.Item("uses")
                     if ($null -ne $uses) {
                         Write-Host "   Found reusable workflow used: [$uses]"
-                        $actionLink = $uses.Split("@")[0]
+                        $splitted = $uses.Split("@")
+                        $actionLink = $splitted[0]
+                        $actionRef = $splitted[1]
 
                         $data = [PSCustomObject]@{
                             actionLink = $actionLink
+                            actionRef = $actionRef
                             workflowFileName = $workflowFileName
                             repo = $repo
                             type = "reusable workflow"
@@ -114,7 +120,7 @@ function GetAllUsedActionsFromRepo {
         return;
     }
     
-    # create hastable to store the results in
+    # create hashtable to store the results in
     $actionsInRepo = @()
 
     Write-Host "Found [$($workflowFiles.Length)] files in the workflows directory"
@@ -147,12 +153,13 @@ function SummarizeActionsUsed {
 
     $summarized =  @()
     foreach ($action in $actions) {
-        $found = $summarized | Where-Object { $_.actionLink -eq $action.actionLink -And $_.type -eq $action.type } 
+        $found = $summarized | Where-Object { $_.actionLink -eq $action.actionLink -And $_.type -eq $action.type }
         if ($null -ne $found) {
             # item already found, add this info to it
             $newInfo =  [PSCustomObject]@{
                 repo = $action.repo
                 workflowFileName = $action.workflowFileName
+                actionRef = $action.actionRef
             }
 
             $found.workflows += $newInfo
@@ -168,6 +175,7 @@ function SummarizeActionsUsed {
                     [PSCustomObject]@{
                         repo = $action.repo
                         workflowFileName = $action.workflowFileName
+                        actionRef = $action.actionRef
                     }
                 )
             }
