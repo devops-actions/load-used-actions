@@ -159,6 +159,7 @@ function SummarizeActionsUsed {
             $newInfo =  [PSCustomObject]@{
                 repo = $action.repo
                 workflowFileName = $action.workflowFileName
+                actionRef = $action.actionRef
             }
 
             $found.workflows += $newInfo
