@@ -153,7 +153,7 @@ function SummarizeActionsUsed {
 
     $summarized =  @()
     foreach ($action in $actions) {
-        $found = $summarized | Where-Object { $_.actionLink -eq $action.actionLink -And $_.actionRef -eq $action.actionRef -And $_.type -eq $action.type }
+        $found = $summarized | Where-Object { $_.actionLink -eq $action.actionLink -And $_.type -eq $action.type }
         if ($null -ne $found) {
             # item already found, add this info to it
             $newInfo =  [PSCustomObject]@{
