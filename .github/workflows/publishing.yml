@@ -30,7 +30,7 @@ jobs:
          ls -la
                                      
          $content = ${{ steps.load-actions.outputs.actions-file }}
-         New-Item -Path 'actions.json' -Value $content -Force | Out-Null
+         #New-Item -Path 'actions.json' -Value $content -Force | Out-Null
          $actions = $content | ConvertFrom-Json
          if ($actions.Length -le 0) {
             throw "No actions found"
@@ -46,9 +46,7 @@ jobs:
           name: actions
           path: |
             actions.json
-            ${{ steps.load-actions.outputs.actions-file }}
-            ${{ steps.load-actions.outputs.actions }}
-            
+            ${{ steps.load-actions.outputs.actions-file }}            
     
   publish:
     needs: test-local-action
