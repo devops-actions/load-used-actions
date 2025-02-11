@@ -27,8 +27,6 @@ jobs:
         run: |
          Write-Host "Found actions [${{ steps.load-actions.outputs.actions-file }}]"
 
-         ls -la
-                                     
          $content = Get-Content "${{ steps.load-actions.outputs.actions-file }}"
          $actions = $content | ConvertFrom-Json
          if ($actions.Length -le 0) {
