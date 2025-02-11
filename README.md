@@ -12,7 +12,7 @@ Used for inserting data into the [internal actions marketplace](https://github.c
 Minimal uses expression to use this action:
 
 ``` yaml
-uses: devops-actions/load-used-actions@v1.3.6
+uses: devops-actions/load-used-actions@v1.3.7
 with: 
     PAT: ${{ secrets.GITHUB_TOKEN }} # use an Access Token with correct permissions to view private repos if you need to
 ```
@@ -33,7 +33,7 @@ jobs:
   load-all-used-actions:
     runs-on: ubuntu-latest
     steps: 
-      - uses: devops-actions/load-used-actions@v1.3.6
+      - uses: devops-actions/load-used-actions@v1.3.7
         name: Load used actions        
         id: load-actions
         with: 
