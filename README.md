@@ -16,7 +16,7 @@ uses: devops-actions/load-used-actions@v1.3.7
 with: 
     PAT: ${{ secrets.GITHUB_TOKEN }} # use an Access Token with correct permissions to view private repos if you need to
 ```
-Note: the default GITHUB_TOKEN might only have read access to the current repository but can read the public repositories for any organization, depending on the specific setup of the GITHUB_TOKEN. Create a new access token (PAT or use a GitHub App) with `repo` scope to have full read-only access to the organization and use that as a parameter.  
+Note: the default GITHUB_TOKEN might only have read access to the current repository but can read the public repositories for any organization, depending on the specific setup of the GITHUB_TOKEN. Create a new access token (PAT or use a GitHub App) with `repo` scope to have full read-only access to the organization and use that as a parameter. To learn more about these types of tokens, read this [blogpost](https://devopsjournal.io/blog/2022/01/03/GitHub-Tokens).
 
 ## Full example
 This example shows how to use the action to get a json file with all the used actions in an organization. The json file is uploaded as an artefact in the third step.
@@ -24,7 +24,8 @@ This example shows how to use the action to get a json file with all the used ac
 |#|Name|Description|
 |---|---|---|
 |1|Load used actions|Run this action to load all actions used in an organization. Note the id of this step|
-|2|Store json file|Output the json value from the output of the action in step 1, by using the id of step 1 in `${{ steps.<step id>.outputs.actions }}`|
+|2a|Store json file|Output the json value from the output of the action in step 1, by using the id of step 1 in `${{ steps.<step id>.outputs.actions }}`. Do note that this can be a string that is to long to fit in the Actions runtime!|
+|2b|Use json file|File that has the json value from the output of the action in step 1, by using the id of step 1 in `${{ steps.<step id>.outputs.actions-file }}`.|
 |3|Upload result file as artefact|Upload the json file as an artefact|
 
 
