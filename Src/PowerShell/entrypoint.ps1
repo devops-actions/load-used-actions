@@ -61,7 +61,7 @@ function main {
     }
 
     # write the file outside of the container so we can pick it up
-    Write-Host "Found [$($actions.Count)] actions"
+    Write-Host "Found [$($actions.Count)] unique actions"
     $jsonObject = ($actions | ConvertTo-Json -Depth 10 -Compress)    
     
     # store the json in a file and write the path to the output variable   
@@ -69,7 +69,7 @@ function main {
     $filePath = "$($env:GITHUB_WORKSPACE)/$fileName"
 
     if ($null -ne $env:GITHUB_WORKSPACE -and "" -ne $env:GITHUB_WORKSPACE) {
-        Write-Host "Writing actions to file in workspace: [$($env:GITHUB_WORKSPACE)]"
+        Write-Host "Writing actions to file in workspace: [$($env:GITHUB_WORKSPACE)] to filePath [$filePath]"
         Set-Content -Value "$jsonObject" -Path "$filePath"
     }
     else {

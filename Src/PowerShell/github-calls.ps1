@@ -57,18 +57,20 @@ function CallWebRequest {
         # convert the response json content
         $info = ($result.Content | ConvertFrom-Json)
     
-        Write-Debug "  Paging links: $($result.Headers["Link"])"
+        
+        $LinkHeader = $result.Headers["Link"]
+        Write-Debug "  Paging links: $($LinkHeader)"
         # Test for paging links and try to enumerate all pages
-        if ($null -ne $result.Headers["Link"]) {
+        if ($null -ne $LinkHeader) {
             #Write-Warning "Paging link detected:"
-            foreach ($page in $result.Headers["Link"].Split(", ")) {
+            foreach ($page in $LinkHeader.Split(",")) {
                             
                 #Write-Host "Found page: [$page]"
                 #Write-Host "rel next found at: [$($page.Split(";")[1])" 
 
-                if ($page.Split("; ")[1] -eq 'rel="next"') {
+                if ($page.Split(";")[1].Trim() -eq 'rel="next"') {
                     #Write-Host "Next page is at [$page]"
-                    $almostUrl = $page.Split(";")[0]
+                    $almostUrl = $page.Split(";")[0].Trim()
                     #Write-Host "Almost: $almostUrl"
                     $linkUrl = $almostUrl.Substring(1, $almostUrl.Length - 2)
                     Write-Host "Handling pagination link with next page at: $linkUrl"
@@ -350,6 +352,8 @@ function GetRawFile {
 
     try {
         $result = $requestResult | Select-Object -Expand Content
+        # remove any empty lines to prevent issues with parsing yaml
+        $result = $result -replace "^\s*$", ""
     }
     catch {
         Write-Warning "Error converting file content from url [$($logUrl)]"

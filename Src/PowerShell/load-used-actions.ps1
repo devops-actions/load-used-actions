@@ -131,6 +131,7 @@ function GetAllUsedActionsFromRepo {
     foreach ($workflowFile in $workflowFiles) {
         try {
             if ($null -ne $workflowFile.download_url -and $workflowFile.download_url.Length -gt 0 -and $workflowFile.download_url.Split("?")[0].EndsWith(".yml")) { 
+                Write-Host "Loading workflow file: [$($workflowFile.name)]"
                 $workflow = GetRawFile -url $workflowFile.download_url -PAT $PAT -userName $userName
                 $actions = GetActionsFromWorkflow -workflow $workflow -workflowFileName $workflowFile.name -repo $repo
 
@@ -252,7 +253,7 @@ function LoadAllActionsFromConfiguration() {
                 
         $summarizeActions = SummarizeActionsUsed -actions $actionsFound
 
-        Write-Host "Found [$($actionsFound.Count)] actions used in workflows with [$($summarizeActions.Count) unique actions]"
+        Write-Host "Found [$($actionsFound.Count)] actions used in [$($repos.Count)] repos by workflows with [$($summarizeActions.Count) unique actions]"
 
         # write the actions to disk
         $fileName = "summarized-actions.json"
