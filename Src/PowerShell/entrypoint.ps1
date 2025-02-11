@@ -43,12 +43,12 @@ function main {
     }
 
     if ($null -eq $PAT -or "" -eq $PAT) {
-        Write-Error "No value given for input PAT: Use at least [GITHUB_TOKEN]"
-        throw
+        $PAT = $env:GITHUB_TOKEN
+        if ($null -eq $PAT -or "" -eq $PAT) {
+            Write-Error "No value given for input PAT: Use at least [GITHUB_TOKEN]"
+            throw
+        }
     }
-
-    echo $pwd
-    ls 
 
     # pull in the methods from load-actions:
     . $PSScriptRoot\load-used-actions.ps1 -orgName $organization -PAT $PAT
