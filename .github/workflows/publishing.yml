@@ -26,8 +26,8 @@ jobs:
       - shell: pwsh        
         run: |
          Write-Host "Found actions [${{ steps.load-actions.outputs.actions-file }}]"
-         $content = ${{ steps.load-actions.outputs.actions-file }}
-         New-Item -Path 'actions.json' -Value $content -Force | Out-Null
+
+         $content = Get-Content "${{ steps.load-actions.outputs.actions-file }}"
          $actions = $content | ConvertFrom-Json
          if ($actions.Length -le 0) {
             throw "No actions found"
@@ -38,9 +38,12 @@ jobs:
             
       - name: Upload result file as artefact
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        if: success() || failure()
         with: 
           name: actions
-          path: actions.json
+          path: |
+            actions.json
+            ${{ steps.load-actions.outputs.actions-file }}            
     
   publish:
     needs: test-local-action
