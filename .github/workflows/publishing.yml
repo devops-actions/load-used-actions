@@ -29,8 +29,7 @@ jobs:
 
          ls -la
                                      
-         $content = ${{ steps.load-actions.outputs.actions-file }}
-         #New-Item -Path 'actions.json' -Value $content -Force | Out-Null
+         $content = Get-Content "${{ steps.load-actions.outputs.actions-file }}"
          $actions = $content | ConvertFrom-Json
          if ($actions.Length -le 0) {
             throw "No actions found"
