@@ -351,9 +351,16 @@ function GetRawFile {
     }
 
     try {
-        $result = $requestResult | Select-Object -Expand Content
+        $result = $requestResult.Content
+        $output = ""
         # remove any empty lines or tabs in the result to prevent issues with parsing yaml
-        $result = $result | Where-Object { $_.Trim().Replace("`t", "") -ne "" } 
+        foreach ($line in $result.Split([Environment]::NewLine)) {
+            $trimmedLine = $line.Trim().Replace("`t", "").Replace(" ", "")
+            if ($trimmedLine.Length -gt 0) {
+                $output += $line + [Environment]::NewLine
+            }
+        }
+        return $output
     }
     catch {
         Write-Warning "Error converting file content from url [$($logUrl)]"
@@ -361,6 +368,4 @@ function GetRawFile {
         Write-Warning "Content: [$requestResult]"
         return ""
     }
-
-    return $result
 }
