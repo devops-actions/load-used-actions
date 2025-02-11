@@ -94,3 +94,6 @@ The workflow object has the following properties:
 |workflowFileName|The name of the workflow file that was found in the directory `.github/workflows/`|
 |actionRef| The 'version' of the reference being used, if any|
 |actionVersionComment| The comment after the  version', if any|
+
+# Testing / running the code locally
+To run this code locally, execute the `entrypoint.ps1` script in the `Src/PowerShell` folder, and sent in the PAT and organization you want to use.
