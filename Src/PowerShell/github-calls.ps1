@@ -352,8 +352,8 @@ function GetRawFile {
 
     try {
         $result = $requestResult | Select-Object -Expand Content
-        # remove any empty lines to prevent issues with parsing yaml
-        $result = $result -replace "^\s*$", ""
+        # remove any empty lines in the result to prevent issues with parsing yaml
+        $result = $result | Where-Object { $_ -ne "" }                
     }
     catch {
         Write-Warning "Error converting file content from url [$($logUrl)]"
