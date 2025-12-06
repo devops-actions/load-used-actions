@@ -12,7 +12,8 @@ on:
     - cron: '30 1 * * 6'
 
 # Declare default  GITHUB_TOKEN permissions as read only.
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   CodeQL-Build:
