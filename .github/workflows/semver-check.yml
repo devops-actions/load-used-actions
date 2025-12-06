@@ -5,6 +5,9 @@ on:
       - '*'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   semver:
     runs-on: ubuntu-latest
