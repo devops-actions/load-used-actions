@@ -12,4 +12,4 @@ jobs:
       contents: write # Required to read workflow files
       id-token: write # Required for dependency submission
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
