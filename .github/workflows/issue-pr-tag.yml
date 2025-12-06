@@ -1,4 +1,8 @@
+
 name: "Issue/PR Tag"
+
+permissions:
+  contents: read
 
 # Trigger workflow when issues or pull requests are opened/edited,
 # or when this workflow file is modified
