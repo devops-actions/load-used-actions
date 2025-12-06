@@ -2,25 +2,31 @@ version: 2
 updates:
   # Enable version updates for npm
   - package-ecosystem: 'npm'
-    # Look for `package.json` and `lock` files in the `root` directory
     directory: '/'
-    # Check the npm registry for updates weekly
     schedule:
       interval: weekly
+    assignees:
+      - rajbos
 
-  # Enable version updates for docker (if that works
+  # Enable version updates for docker (if that works)
   - package-ecosystem: 'docker'
     directory: '/'
     schedule:
       interval: monthly
+    assignees:
+      - rajbos
 
   # Enable version updates for actions
   - package-ecosystem: 'github-actions'
     directory: '.github/workflows/'
     schedule:
       interval: monthly
+    assignees:
+      - rajbos
 
   - package-ecosystem: github-actions
-    directory: /
+    directory: '/'
     schedule:
       interval: monthly
+    assignees:
+      - rajbos
