@@ -5,6 +5,10 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * 1' # Weekly
+
+permissions:
+  contents: read
+  
 jobs:
   submit-dependencies:
     uses: devops-actions/.github/.github/workflows/actions-dependencies.yml@main
