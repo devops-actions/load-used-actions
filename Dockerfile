@@ -1,4 +1,4 @@
-FROM ghcr.io/rajbos/actions-marketplace/powershell:7@sha256:6cf4107b343487fa6f6a34ae0f12fc9482897f9002aede4ef9077cebb8cb4400
+FROM ghcr.io/rajbos/actions-marketplace/powershell:7@sha256:a9fe9a6cb3a2fc18c763899d3e7c0e1863cda5bfd02076e6d4b9accc90df078e
 
 ENV DOCKER=true
 
