@@ -37,7 +37,9 @@ function CallWebRequest {
     }    
 
     $Headers = Get-Headers -userName $userName -PAT $PAT
-    Write-Host "Calling api on url [$url]"
+    # mask any token query parameters in the URL for logging
+    $logSafeUrl = $url -replace '\?token=[^&]+', '?token=****'
+    Write-Host "Calling api on url [$logSafeUrl]"
 
     try {
         $bodyContent = ($body | ConvertTo-Json) -replace '\\', '\'
@@ -96,7 +98,7 @@ function CallWebRequest {
         }
 
         if ($false -eq $skipWarnings) {
-            Write-Host "Error calling api at [$url]:"
+            Write-Host "Error calling api at [$logSafeUrl]:"
             Write-Host "  StatusCode: $($_.Exception.Response.StatusCode)"
             Write-Host "  RateLimit-Limit: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Limit"))"
             Write-Host "  RateLimit-Remaining: $($_.Exception.Response.Headers.GetValues("X-RateLimit-Remaining"))"
@@ -289,7 +291,8 @@ function FindAllRepos {
     param (
         [string] $orgName,
         [string] $userName,
-        [string] $PAT
+        [string] $PAT,
+        [bool] $includeArchived = $true
     )
 
     # todo: add support for pagination
@@ -303,6 +306,12 @@ function FindAllRepos {
         Write-Warning "Error loading information from org with name [$orgName], trying with user based repository list"
         $url = GetGitHubUrl "users/$orgName/repos"
         $info = CallWebRequest -url $url -userName $userName -PAT $PAT -skipWarnings $true
+    }
+
+    if (-not $includeArchived) {
+        $archivedCount = ($info | Where-Object { $_.archived -eq $true }).Count
+        $info = $info | Where-Object { $_.archived -ne $true }
+        Write-Host "Filtered out [$archivedCount] archived repositories"
     }
 
     Write-Host "Found [$($info.Count)] repositories in [$orgName]"

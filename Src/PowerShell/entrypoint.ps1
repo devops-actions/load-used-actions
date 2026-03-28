@@ -1,6 +1,7 @@
 param (
     [string] $organization,
-    [string] $PAT
+    [string] $PAT,
+    [string] $includeArchivedRepos = "true"
 )
 
 function Get-LocationInfo {
@@ -51,7 +52,7 @@ function main {
     }
 
     # pull in the methods from load-actions:
-    . $PSScriptRoot\load-used-actions.ps1 -orgName $organization -PAT $PAT
+    . $PSScriptRoot\load-used-actions.ps1 -orgName $organization -PAT $PAT -includeArchivedRepos $includeArchivedRepos
 
     # Get all actions
     $actions = LoadAllActionsFromConfiguration
