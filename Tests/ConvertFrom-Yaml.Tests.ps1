@@ -96,3 +96,36 @@ Describe "Test container image detection" {
         $redisImage | Should -Not -BeNullOrEmpty
     }
 }
+
+Describe "Test composite action parsing" {
+    It "Should extract actions from a composite action file" {
+        $content = Get-Content "Tests/Files/composite-action.yml" -Raw
+        $actions = GetActionsFromCompositeAction -content $content -fileName "action.yml" -repo "test/composite-repo"
+
+        $regularActions = $actions | Where-Object { $_.type -eq "action" }
+        $containerImages = $actions | Where-Object { $_.type -eq "container-image" }
+
+        # should find 3 regular actions: checkout, setup-node, cache
+        $regularActions.Count | Should -Be 3
+
+        # should find 1 container image: docker://alpine:3.18
+        $containerImages.Count | Should -Be 1
+        $containerImages[0].actionLink | Should -Be "docker://alpine:3.18"
+
+        # verify action links
+        ($regularActions | Where-Object { $_.actionLink -eq "actions/checkout" }) | Should -Not -BeNullOrEmpty
+        ($regularActions | Where-Object { $_.actionLink -eq "actions/setup-node" }) | Should -Not -BeNullOrEmpty
+        ($regularActions | Where-Object { $_.actionLink -eq "actions/cache" }) | Should -Not -BeNullOrEmpty
+
+        # verify all have correct repo
+        $actions | ForEach-Object { $_.repo | Should -Be "test/composite-repo" }
+    }
+
+    It "Should return empty for non-composite action files" {
+        # a regular workflow file should not be parsed as a composite action
+        $content = Get-Content "Tests/Files/normal-indentation.yml" -Raw
+        $actions = GetActionsFromCompositeAction -content $content -fileName "action.yml" -repo "test/repo"
+
+        $actions.Count | Should -Be 0
+    }
+}
