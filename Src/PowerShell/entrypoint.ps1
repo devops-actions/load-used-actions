@@ -86,6 +86,22 @@ function main {
     
     # write json content to output variable for backward compatibility (this used to be the only way to get the json)
     Add-Content -Value "actions='$jsonObject'" -Path $env:GITHUB_OUTPUT
+
+    # write container images file if it exists
+    $containerImagesFileName = "container-images.json"
+    $containerImagesFilePath = "$($env:GITHUB_WORKSPACE)/$containerImagesFileName"
+    $srcContainerFile = "$PSScriptRoot/$containerImagesFileName"
+    if (Test-Path $srcContainerFile) {
+        if ($null -ne $env:GITHUB_WORKSPACE -and "" -ne $env:GITHUB_WORKSPACE) {
+            Copy-Item -Path $srcContainerFile -Destination $containerImagesFilePath
+        }
+        else {
+            $containerImagesFilePath = "./$containerImagesFileName"
+            Copy-Item -Path $srcContainerFile -Destination $containerImagesFilePath
+        }
+        Add-Content -Value "container-images-file=$containerImagesFileName" -Path $env:GITHUB_OUTPUT
+        Write-Host "Stored container images file in the output. Use $${{ steps.<step id>.outputs.container-images-file }} to load the file"
+    }
 }
 
 $moduleName = "powershell-yaml"

@@ -1,5 +1,6 @@
 BeforeAll {
     Import-Module "powershell-yaml" -Force
+    . ./Src/PowerShell/load-used-actions.ps1 -orgName "test" -PAT "test-pat"
 }
 
 Describe "Test conversion with multiple indentation" {
@@ -61,5 +62,37 @@ Describe "Test conversion with normal indentation" {
             }
         }
         $jobCount | Should -Be 4
+    }
+}
+
+Describe "Test container image detection" {
+    It "Should detect docker:// step references, job containers, and service images" {
+        $content = Get-Content "Tests/Files/container-images.yml" -Raw
+        $actions = GetActionsFromWorkflow -workflow $content -workflowFileName "container-images.yml" -repo "test/repo"
+
+        $containerImages = $actions | Where-Object { $_.type -eq "container-image" }
+        $regularActions = $actions | Where-Object { $_.type -eq "action" }
+
+        # should find 5 container images: node:18-alpine, redis:7, postgres:15, docker://ghcr.io/..., python:3.12-slim
+        $containerImages.Count | Should -Be 5
+
+        # should find 2 regular actions: actions/checkout@v4 (twice)
+        $regularActions.Count | Should -Be 2
+
+        # verify docker:// reference was detected
+        $dockerRef = $containerImages | Where-Object { $_.actionLink -like "docker://*" }
+        $dockerRef | Should -Not -BeNullOrEmpty
+        $dockerRef.actionLink | Should -Be "docker://ghcr.io/some-org/some-tool:latest"
+
+        # verify job container images were detected
+        $nodeImage = $containerImages | Where-Object { $_.actionLink -eq "node:18-alpine" }
+        $nodeImage | Should -Not -BeNullOrEmpty
+
+        $pythonImage = $containerImages | Where-Object { $_.actionLink -eq "python:3.12-slim" }
+        $pythonImage | Should -Not -BeNullOrEmpty
+
+        # verify service images were detected
+        $redisImage = $containerImages | Where-Object { $_.actionLink -eq "redis:7" }
+        $redisImage | Should -Not -BeNullOrEmpty
     }
 }
