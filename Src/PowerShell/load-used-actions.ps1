@@ -4,7 +4,8 @@ param (
     [string] $orgName,
     [string] $userName,
     [string] $PAT,
-    [string] $marketplaceRepo
+    [string] $marketplaceRepo,
+    [string] $includeArchivedRepos = "true"
 )
 
 # pull in central calls library
@@ -140,7 +141,7 @@ function GetAllUsedActionsFromRepo {
         }
         catch {
             Write-Warning "Error handling this workflow file [$($workflowFile.name)] in repo [$repo]:"
-            Write-Host ($workflowFile | ConvertFrom-Json -Depth 10).Replace($PAT, "****")
+            Write-Host (($workflowFile | ConvertTo-Json -Depth 10) -replace [regex]::Escape($PAT), "****")
             Write-Warning "----------------------------------"
             Write-Host "Error: [$_]"
             Write-Warning "----------------------------------"
@@ -242,9 +243,12 @@ function LoadAllActionsFromConfiguration() {
 
     Write-Host "- userName: [$userName]"
     Write-Host "- marketplaceRepo: [$marketplaceRepo]"
+    Write-Host "- includeArchivedRepos: [$includeArchivedRepos]"
+
+    $includeArchived = $includeArchivedRepos -ne "false"
 
     # get all repos in an org
-    $repos = FindAllRepos -orgName $orgName -userName $userName -PAT $PAT
+    $repos = FindAllRepos -orgName $orgName -userName $userName -PAT $PAT -includeArchived $includeArchived
 
     # get actions from the workflows in the repos
     $actionsFound = LoadAllUsedActionsFromRepos -repos $repos -userName $userName -PAT $PAT -marketplaceRepo $marketplaceRepo

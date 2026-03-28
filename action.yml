@@ -11,7 +11,11 @@ inputs:
     required: false
   PAT:
     description: 'Personal access token to use for analysis. Leaving this empty will use the default GITHUB_TOKEN that could have limited access rights'
-    required: true 
+    required: true
+  include-archived-repositories:
+    description: 'Include archived repositories in the scan. Set to false to skip archived repos (which have Actions disabled)'
+    required: false
+    default: 'true'
 outputs:
   actions-file:
     description: 'Location of the file containing the list of all actions used in the organization'
@@ -20,4 +24,5 @@ runs:
   image: 'Dockerfile'
   args: 
     - '${{ inputs.organization }}' 
-    - '${{ inputs.PAT }}' 
+    - '${{ inputs.PAT }}'
+    - '${{ inputs.include-archived-repositories }}'

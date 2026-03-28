@@ -18,6 +18,39 @@ with:
 ```
 Note: the default GITHUB_TOKEN might only have read access to the current repository but can read the public repositories for any organization, depending on the specific setup of the GITHUB_TOKEN. Create a new access token (PAT or use a GitHub App) with `repo` scope to have full read-only access to the organization and use that as a parameter. To learn more about these types of tokens, read this [blogpost](https://devopsjournal.io/blog/2022/01/03/GitHub-Tokens).
 
+### Using a GitHub App (recommended)
+Using a [GitHub App](https://docs.github.com/en/apps/creating-github-apps) is preferred over a Personal Access Token (PAT) because:
+- **Scoped permissions**: A GitHub App can be granted only the permissions it needs, rather than broad `repo` scope.
+- **No user dependency**: Tokens are not tied to a personal account, so they won't break if someone leaves the organization.
+- **Higher rate limits**: GitHub Apps have higher API rate limits than PATs.
+
+You can use an action like [actions/create-github-app-token](https://github.com/actions/create-github-app-token) to generate a short-lived token from your GitHub App:
+
+``` yaml
+jobs:
+  load-all-used-actions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - uses: devops-actions/load-used-actions@v1.3.7
+        name: Load used actions        
+        id: load-actions
+        with: 
+          PAT: ${{ steps.app-token.outputs.token }}
+
+      - name: Upload result file as artefact
+        uses: actions/upload-artifact@v4
+        with: 
+          name: actions-file
+          path: ${{ steps.load-actions.outputs.actions-file }}
+```
+
 ## Full example
 This example shows how to use the action to get a json file with all the used actions in an organization. The json file is uploaded as an artefact in the third step.
 
@@ -52,10 +85,11 @@ jobs:
 ```
 
 ## Inputs
-|Name|Description|
-|---|---|
-|organization|The name of the organization to run on.|
-|PAT|The Personal Access Token to use for the API calls.|
+|Name|Description|Required|Default|
+|---|---|---|---|
+|organization|The name of the organization to run on.|No|Current organization|
+|PAT|The Personal Access Token (or GitHub App token) to use for the API calls.|Yes|-|
+|include-archived-repositories|Include archived repositories in the scan. Set to `false` to skip them.|No|`true`|
 
 ## Outputs
 actions-file: path to file containing compressed json string with all the actions used in the workflows in the organization. The json is in the format:
