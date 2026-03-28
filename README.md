@@ -129,5 +129,13 @@ The workflow object has the following properties:
 |actionRef| The 'version' of the reference being used, if any|
 |actionVersionComment| The comment after the  version', if any|
 
+## Container Images Output
+`container-images-file`: path to a JSON file listing all container images referenced in workflows. This includes:
+- Job-level `container` images
+- Service/sidecar container images
+- Steps using `docker://` references
+
+The JSON format is the same as the actions file, with `type` set to `"container-image"` and `actionLink` containing the image reference.
+
 # Testing / running the code locally
 To run this code locally, execute the `entrypoint.ps1` script in the `Src/PowerShell` folder, and sent in the PAT and organization you want to use.

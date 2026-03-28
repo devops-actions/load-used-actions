@@ -19,6 +19,8 @@ inputs:
 outputs:
   actions-file:
     description: 'Location of the file containing the list of all actions used in the organization'
+  container-images-file:
+    description: 'Location of the file containing the list of all container images used in workflows (job containers, services, and docker:// step references)'
 runs:
   using: 'docker'
   image: 'Dockerfile'

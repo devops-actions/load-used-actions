@@ -40,27 +40,90 @@ function  GetActionsFromWorkflow {
             # go through the parsed yaml
             foreach ($job in $parsedYaml["jobs"].GetEnumerator()) {
                 Write-Host "  Job found: [$($job.Key)]"
+
+                # check for job-level container image (#149)
+                $jobContainer = $job.Value.Item("container")
+                if ($null -ne $jobContainer) {
+                    $containerImage = $null
+                    if ($jobContainer -is [string]) {
+                        $containerImage = $jobContainer
+                    }
+                    elseif ($null -ne $jobContainer.Item("image")) {
+                        $containerImage = $jobContainer.Item("image")
+                    }
+                    if ($null -ne $containerImage -and $containerImage.Length -gt 0) {
+                        Write-Host "   Found job container image: [$containerImage]"
+                        $actions += [PSCustomObject]@{
+                            actionLink = $containerImage
+                            actionRef = $null
+                            actionVersionComment = $null
+                            workflowFileName = $workflowFileName
+                            repo = $repo
+                            type = "container-image"
+                        }
+                    }
+                }
+
+                # check for job-level services / sidecars (#149)
+                $services = $job.Value.Item("services")
+                if ($null -ne $services) {
+                    foreach ($service in $services.GetEnumerator()) {
+                        $serviceImage = $null
+                        if ($service.Value -is [string]) {
+                            $serviceImage = $service.Value
+                        }
+                        elseif ($null -ne $service.Value.Item("image")) {
+                            $serviceImage = $service.Value.Item("image")
+                        }
+                        if ($null -ne $serviceImage -and $serviceImage.Length -gt 0) {
+                            Write-Host "   Found service container image [$($service.Key)]: [$serviceImage]"
+                            $actions += [PSCustomObject]@{
+                                actionLink = $serviceImage
+                                actionRef = $null
+                                actionVersionComment = $null
+                                workflowFileName = $workflowFileName
+                                repo = $repo
+                                type = "container-image"
+                            }
+                        }
+                    }
+                }
+
                 $steps=$job.Value.Item("steps")
                 if ($null -ne $steps) {
                     foreach ($step in $steps) {
                         $uses=$step.Item("uses")
                         if ($null -ne $uses) {
-                            Write-Host "   Found action used: [$uses]"
-                            $splitted = $uses.Split("@")
-                            $actionLink = $splitted[0]
-                            $actionRef = $splitted[1]
-                            $actionVersionComment = $splitted[2]
-
-                            $data = [PSCustomObject]@{
-                                actionLink = $actionLink
-                                actionRef = $actionRef
-                                actionVersionComment = $actionVersionComment
-                                workflowFileName = $workflowFileName                                
-                                repo = $repo
-                                type = "action"
+                            # detect docker:// container references (#6)
+                            if ($uses.StartsWith("docker://")) {
+                                Write-Host "   Found container image used: [$uses]"
+                                $actions += [PSCustomObject]@{
+                                    actionLink = $uses
+                                    actionRef = $null
+                                    actionVersionComment = $null
+                                    workflowFileName = $workflowFileName
+                                    repo = $repo
+                                    type = "container-image"
+                                }
                             }
+                            else {
+                                Write-Host "   Found action used: [$uses]"
+                                $splitted = $uses.Split("@")
+                                $actionLink = $splitted[0]
+                                $actionRef = $splitted[1]
+                                $actionVersionComment = $splitted[2]
 
-                            $actions += $data
+                                $data = [PSCustomObject]@{
+                                    actionLink = $actionLink
+                                    actionRef = $actionRef
+                                    actionVersionComment = $actionVersionComment
+                                    workflowFileName = $workflowFileName                                
+                                    repo = $repo
+                                    type = "action"
+                                }
+
+                                $actions += $data
+                            }
                         }
                     }
                 }
@@ -254,16 +317,31 @@ function LoadAllActionsFromConfiguration() {
     $actionsFound = LoadAllUsedActionsFromRepos -repos $repos -userName $userName -PAT $PAT -marketplaceRepo $marketplaceRepo
 
     if ($actionsFound.Count -gt 0) {
-                
-        $summarizeActions = SummarizeActionsUsed -actions $actionsFound
+        
+        # separate container images from actions/reusable workflows
+        $containerImages = $actionsFound | Where-Object { $_.type -eq "container-image" }
+        $actionsOnly = $actionsFound | Where-Object { $_.type -ne "container-image" }
 
-        Write-Host "Found [$($actionsFound.Count)] actions used in [$($repos.Count)] repos by workflows with [$($summarizeActions.Count) unique actions]"
+        $summarizeActions = SummarizeActionsUsed -actions $actionsOnly
+
+        Write-Host "Found [$($actionsOnly.Count)] actions used in [$($repos.Count)] repos by workflows with [$($summarizeActions.Count) unique actions]"
 
         # write the actions to disk
         $fileName = "summarized-actions.json"
         $jsonObject = ($summarizeActions | ConvertTo-Json -Depth 10)
         New-Item -Path $fileName -Value $jsonObject -Force | Out-Null
         Write-Host "Stored the summarized usage info into this file: [$fileName] in this directory: [$PWD]"
+
+        # summarize and write container images if any were found
+        if ($null -ne $containerImages -and $containerImages.Count -gt 0) {
+            $summarizedContainerImages = SummarizeActionsUsed -actions $containerImages
+            Write-Host "Found [$($containerImages.Count)] container image references with [$($summarizedContainerImages.Count)] unique images"
+
+            $containerFileName = "container-images.json"
+            $containerJsonObject = ($summarizedContainerImages | ConvertTo-Json -Depth 10)
+            New-Item -Path $containerFileName -Value $containerJsonObject -Force | Out-Null
+            Write-Host "Stored the container images info into this file: [$containerFileName] in this directory: [$PWD]"
+        }
 
         # upload the data into the marketplaceRepo
         #Write-Host "Found [$($actionsFound.actions.Length)] actions in use!"
