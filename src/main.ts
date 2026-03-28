@@ -16,6 +16,81 @@ import {
 import { ActionReference } from './types';
 import { Octokit } from '@octokit/rest';
 
+/** Maximum composite-action nesting depth (mirrors the GitHub Actions runner limit). */
+export const MAX_COMPOSITE_NESTING_DEPTH = 9;
+
+/**
+ * Recursively resolve all actions used by a composite action at owner/repoName,
+ * following nested composite action references up to MAX_COMPOSITE_NESTING_DEPTH levels deep.
+ *
+ * @param octokit   Authenticated Octokit instance
+ * @param pat       Personal access token for raw-file downloads
+ * @param owner     Repository owner (org or user)
+ * @param repoName  Repository name
+ * @param depth     Current recursion depth (0 = root call)
+ * @param visited   Set of "owner/repo" strings already processed (cycle guard)
+ * @returns All ActionReference objects found at this level and below
+ */
+export async function resolveCompositeActionsRecursively(
+  octokit: Octokit,
+  pat: string,
+  owner: string,
+  repoName: string,
+  depth: number,
+  visited: Set<string>
+): Promise<ActionReference[]> {
+  const visitKey = `${owner}/${repoName}`;
+  if (visited.has(visitKey) || depth > MAX_COMPOSITE_NESTING_DEPTH) return [];
+  visited.add(visitKey);
+
+  const allActions: ActionReference[] = [];
+
+  for (const actionFileName of ['action.yml', 'action.yaml']) {
+    try {
+      const fileInfo = await getFileInfo(octokit, owner, repoName, actionFileName);
+      if (fileInfo && fileInfo.download_url) {
+        console.log(
+          `Found [${actionFileName}] in [${owner}/${repoName}], checking for composite action (depth=${depth})`
+        );
+        const content = await getRawFile(fileInfo.download_url, pat);
+        if (content && content.length > 0) {
+          const directActions = getActionsFromCompositeAction(
+            content,
+            actionFileName,
+            `${owner}/${repoName}`
+          );
+          allActions.push(...directActions);
+
+          // Recurse into any nested composite actions found in the steps
+          for (const action of directActions) {
+            if (action.type === 'action' && action.actionLink) {
+              const parts = action.actionLink.split('/');
+              if (parts.length >= 2) {
+                const nestedOwner = parts[0];
+                const nestedRepo = parts[1];
+                const nestedActions = await resolveCompositeActionsRecursively(
+                  octokit,
+                  pat,
+                  nestedOwner,
+                  nestedRepo,
+                  depth + 1,
+                  visited
+                );
+                allActions.push(...nestedActions);
+              }
+            }
+          }
+        }
+        break; // action.yml found — skip action.yaml
+      }
+    } catch {
+      // File not found or error loading it — continue to next filename
+    }
+  }
+
+  return allActions;
+}
+
 async function getAllUsedActionsFromRepo(
   repo: string,
   pat: string,
@@ -45,23 +120,17 @@ async function getAllUsedActionsFromRepo(
     }
   }
 
-  // Check for composite action files at repo root (action.yml / action.yaml)
-  for (const actionFileName of ['action.yml', 'action.yaml']) {
-    try {
-      const fileInfo = await getFileInfo(octokit, owner, repoName, actionFileName);
-      if (fileInfo && fileInfo.download_url) {
-        console.log(`Found [${actionFileName}] in repo [${repo}], checking for composite action`);
-        const content = await getRawFile(fileInfo.download_url, pat);
-        if (content && content.length > 0) {
-          const compositeActions = getActionsFromCompositeAction(content, actionFileName, repo);
-          actionsInRepo.push(...compositeActions);
-        }
-        break; // don't check action.yaml if action.yml was found
-      }
-    } catch {
-      // No action file found or error loading it
-    }
-  }
+  // Check for composite action at repo root and resolve nested composite actions recursively
+  const visited = new Set<string>();
+  const compositeActions = await resolveCompositeActionsRecursively(
+    octokit,
+    pat,
+    owner,
+    repoName,
+    0,
+    visited
+  );
+  actionsInRepo.push(...compositeActions);
 
   return actionsInRepo;
 }
