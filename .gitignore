@@ -4,3 +4,6 @@ Src/PowerShell/used-actions.json
 Src/PowerShell/github_output_file
 Src/PowerShell/entrypoint.ps1
 Src/PowerShell/github_workspace/used-actions.json
+
+node_modules/
+lib/

@@ -22,9 +22,12 @@ outputs:
   container-images-file:
     description: 'Location of the file containing the list of all container images used in workflows (job containers, services, and docker:// step references)'
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args: 
-    - '${{ inputs.organization }}' 
-    - '${{ inputs.PAT }}'
-    - '${{ inputs.include-archived-repositories }}'
+  using: 'node20'
+  main: 'dist/index.js'
+  # Previous Docker-based config (kept for reference):
+  # using: 'docker'
+  # image: 'Dockerfile'
+  # args:
+  #   - '${{ inputs.organization }}'
+  #   - '${{ inputs.PAT }}'
+  #   - '${{ inputs.include-archived-repositories }}'
