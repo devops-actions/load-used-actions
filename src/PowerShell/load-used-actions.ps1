@@ -174,6 +174,70 @@ function  GetActionsFromWorkflow {
     return $actions
 }
 
+function GetActionsFromCompositeAction {
+    param (
+        [string] $content,
+        [string] $fileName,
+        [string] $repo
+    )
+
+    $parsedYaml = ""
+    try {
+        $parsedYaml = ConvertFrom-Yaml $content
+    }
+    catch {
+        Write-Warning "Error parsing composite action file: [$fileName] in repo: [$repo]"
+        return @()
+    }
+
+    $actions = @()
+    try {
+        $runs = $parsedYaml["runs"]
+        if ($null -eq $runs) { return $actions }
+
+        $using = $runs.Item("using")
+        if ($using -ne "composite") { return $actions }
+
+        $steps = $runs.Item("steps")
+        if ($null -eq $steps) { return $actions }
+
+        Write-Host "  Composite action found in [$repo/$fileName]"
+        foreach ($step in $steps) {
+            $uses = $step.Item("uses")
+            if ($null -ne $uses) {
+                if ($uses.StartsWith("docker://")) {
+                    Write-Host "   Found container image in composite action: [$uses]"
+                    $actions += [PSCustomObject]@{
+                        actionLink = $uses
+                        actionRef = $null
+                        actionVersionComment = $null
+                        workflowFileName = $fileName
+                        repo = $repo
+                        type = "container-image"
+                    }
+                }
+                else {
+                    Write-Host "   Found action in composite action: [$uses]"
+                    $splitted = $uses.Split("@")
+                    $actions += [PSCustomObject]@{
+                        actionLink = $splitted[0]
+                        actionRef = $splitted[1]
+                        actionVersionComment = $splitted[2]
+                        workflowFileName = $fileName
+                        repo = $repo
+                        type = "action"
+                    }
+                }
+            }
+        }
+    }
+    catch {
+        Write-Warning "Error processing composite action [$fileName] in repo [$repo]: $_"
+    }
+
+    return $actions
+}
+
 function GetAllUsedActionsFromRepo {
     param (
         [string] $repo,
@@ -185,30 +249,51 @@ function GetAllUsedActionsFromRepo {
     $workflowFiles = GetAllFilesInPath -repository $repo -path ".github/workflows" -PAT $PAT -userName $userName
     if (([string]$workflowFiles).StartsWith("https://docs.github.com/")) {
         Write-Host "Could not get workflow files from [$repo]"
-        return;
+        # don't return yet — repo may still have a composite action
     }
     
     # create hashtable to store the results in
     $actionsInRepo = @()
 
-    Write-Host "Found [$($workflowFiles.Length)] files in the workflows directory"
-    foreach ($workflowFile in $workflowFiles) {
-        try {
-            if ($null -ne $workflowFile.download_url -and $workflowFile.download_url.Length -gt 0 -and $workflowFile.download_url.Split("?")[0].EndsWith(".yml")) { 
-                Write-Host "Loading workflow file: [$($workflowFile.name)]"
-                $workflow = GetRawFile -url $workflowFile.download_url -PAT $PAT -userName $userName
-                $actions = GetActionsFromWorkflow -workflow $workflow -workflowFileName $workflowFile.name -repo $repo
+    if ($null -ne $workflowFiles -and -not ([string]$workflowFiles).StartsWith("https://docs.github.com/")) {
+        Write-Host "Found [$($workflowFiles.Length)] files in the workflows directory"
+        foreach ($workflowFile in $workflowFiles) {
+            try {
+                if ($null -ne $workflowFile.download_url -and $workflowFile.download_url.Length -gt 0 -and $workflowFile.download_url.Split("?")[0].EndsWith(".yml")) { 
+                    Write-Host "Loading workflow file: [$($workflowFile.name)]"
+                    $workflow = GetRawFile -url $workflowFile.download_url -PAT $PAT -userName $userName
+                    $actions = GetActionsFromWorkflow -workflow $workflow -workflowFileName $workflowFile.name -repo $repo
 
-                $actionsInRepo += $actions
+                    $actionsInRepo += $actions
+                }
+            }
+            catch {
+                Write-Warning "Error handling this workflow file [$($workflowFile.name)] in repo [$repo]:"
+                Write-Host (($workflowFile | ConvertTo-Json -Depth 10) -replace [regex]::Escape($PAT), "****")
+                Write-Warning "----------------------------------"
+                Write-Host "Error: [$_]"
+                Write-Warning "----------------------------------"
+                #continue
+            }
+        }
+    }
+
+    # check for composite action files at repo root (action.yml / action.yaml)
+    foreach ($actionFileName in @("action.yml", "action.yaml")) {
+        try {
+            $fileInfo = GetFileInfo -repository $repo -fileName $actionFileName -userName $userName -PAT $PAT
+            if ($null -ne $fileInfo -and $null -ne $fileInfo.download_url) {
+                Write-Host "Found [$actionFileName] in repo [$repo], checking for composite action"
+                $content = GetRawFile -url $fileInfo.download_url -PAT $PAT -userName $userName
+                if ($null -ne $content -and $content.Length -gt 0) {
+                    $compositeActions = GetActionsFromCompositeAction -content $content -fileName $actionFileName -repo $repo
+                    $actionsInRepo += $compositeActions
+                }
+                break  # don't check action.yaml if action.yml was found
             }
         }
         catch {
-            Write-Warning "Error handling this workflow file [$($workflowFile.name)] in repo [$repo]:"
-            Write-Host (($workflowFile | ConvertTo-Json -Depth 10) -replace [regex]::Escape($PAT), "****")
-            Write-Warning "----------------------------------"
-            Write-Host "Error: [$_]"
-            Write-Warning "----------------------------------"
-            #continue
+            Write-Debug "No [$actionFileName] found in repo [$repo] or error loading it"
         }
     }
 

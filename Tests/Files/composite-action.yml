@@ -1,0 +1,17 @@
+name: 'My Composite Action'
+description: 'A test composite action'
+inputs:
+  token:
+    description: 'GitHub token'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - run: echo "Hello from composite"
+      shell: bash
+    - uses: docker://alpine:3.18
+    - uses: actions/cache@v3
