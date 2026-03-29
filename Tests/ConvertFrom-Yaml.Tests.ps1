@@ -1,6 +1,6 @@
 BeforeAll {
     Import-Module "powershell-yaml" -Force
-    . ./Src/PowerShell/load-used-actions.ps1 -orgName "test" -PAT "test-pat"
+    . ./src/PowerShell/load-used-actions.ps1 -orgName "test" -PAT "test-pat"
 }
 
 Describe "Test conversion with multiple indentation" {

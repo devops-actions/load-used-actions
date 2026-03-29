@@ -9,8 +9,8 @@ BeforeAll {
 
     Import-Module "powershell-yaml" -Force
     # pull in central calls library
-    . .\Src\PowerShell\github-calls.ps1
-    . .\Src\PowerShell\load-used-actions.ps1 -orgName "rajbos-actions" -userName "rajbos" -marketplaceRepo "rajbos/actions-marketplace" -PAT $Global:PAT
+    . .\src\PowerShell\github-calls.ps1
+    . .\src\PowerShell\load-used-actions.ps1 -orgName "rajbos-actions" -userName "rajbos" -marketplaceRepo "rajbos/actions-marketplace" -PAT $Global:PAT
 }
 
 Describe "Download OSSF workflow" {
