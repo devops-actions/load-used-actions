@@ -1,0 +1,63 @@
+name: Validate action on PR
+
+on:
+  push:
+    branches:
+      - triage-open-issues
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    name: Run unit tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  run-local-action:
+    runs-on: ubuntu-latest
+    name: Run action from branch
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./
+        name: Load used actions for current org
+        id: load-actions
+        with:
+          PAT: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate output
+        shell: bash
+        run: |
+          echo "Actions file: ${{ steps.load-actions.outputs.actions-file }}"
+          if [ ! -f "${{ steps.load-actions.outputs.actions-file }}" ]; then
+            echo "::error::Output file not found"
+            exit 1
+          fi
+          count=$(jq '. | length' "${{ steps.load-actions.outputs.actions-file }}")
+          echo "Found ${count} unique actions"
+          if [ "${count}" -le 0 ]; then
+            echo "::error::No actions found in output"
+            exit 1
+          fi
+          echo "### Action validation passed: ${count} unique actions found" >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload result as artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: used-actions-${{ github.run_id }}
+          path: used-actions.json
