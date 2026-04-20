@@ -37,8 +37,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      # For Dependabot PRs: validate that only dependency files changed and skip full analysis.
+      # This satisfies the required CodeQL-Build status check without running a full scan,
+      # since Dependabot only bumps dependency versions and introduces no new source code.
+      - name: Validate Dependabot dependency-only changes
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Dependabot PR detected — validating only dependency files changed"
+          changed_files=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files --paginate --jq '.[].filename')
+          echo "Changed files:"
+          echo "$changed_files"
+          non_dep=$(echo "$changed_files" | grep -v -E '^(package\.json|package-lock\.json)$' || true)
+          if [ -n "$non_dep" ]; then
+            echo "::error::Unexpected non-dependency files changed in Dependabot PR:"
+            echo "$non_dep"
+            exit 1
+          fi
+          echo "✅ Only dependency files changed — CodeQL analysis not required"
+
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
+        if: "!(github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')"
         uses: github/codeql-action/init@c10b8064de6f491fea524254123dbe5e09572f13 # v3.29.5
         # Override language selection by uncommenting this and choosing your languages
         # with:
@@ -47,18 +68,9 @@ jobs:
       # Autobuild attempts to build any compiled languages (C/C++, C#, Go, or Java).
       # If this step fails, then you should remove it and run the build manually (see below).
       - name: Autobuild
+        if: "!(github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')"
         uses: github/codeql-action/autobuild@c10b8064de6f491fea524254123dbe5e09572f13 # v3.29.5
 
-      # ℹ️ Command-line programs to run using the OS shell.
-      # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-
-      # ✏️ If the Autobuild fails above, remove it and uncomment the following
-      #    three lines and modify them (or add more) to build your code if your
-      #    project uses a compiled language
-
-      #- run: |
-      #     make bootstrap
-      #     make release
-
       - name: Perform CodeQL Analysis
+        if: "!(github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')"
         uses: github/codeql-action/analyze@c10b8064de6f491fea524254123dbe5e09572f13 # v3.29.5
