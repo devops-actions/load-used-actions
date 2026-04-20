@@ -21,7 +21,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^25.5.2",
     "@vercel/ncc": "^0.38.0",
-    "typescript": "^6.0.2",
-    "vitest": "^4.1.2"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.4"
   }
 }
