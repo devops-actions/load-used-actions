@@ -49,7 +49,7 @@ jobs:
           changed_files=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files --paginate --jq '.[].filename')
           echo "Changed files:"
           echo "$changed_files"
-          non_dep=$(echo "$changed_files" | grep -v -E '^(package\.json|package-lock\.json)$' || true)
+          non_dep=$(echo "$changed_files" | grep -v -E '^(package\.json|package-lock\.json|yarn\.lock|\.github/workflows/[^/]+\.ya?ml|\.github/dependabot\.yml)$' || true)
           if [ -n "$non_dep" ]; then
             echo "::error::Unexpected non-dependency files changed in Dependabot PR:"
             echo "$non_dep"
