@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -95,7 +95,7 @@ jobs:
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         if: "!(github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')"
-        uses: github/codeql-action/init@c10b8064de6f491fea524254123dbe5e09572f13 # v3.29.5
+        uses: github/codeql-action/init@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v3.29.5
         # Override language selection by uncommenting this and choosing your languages
         # with:
         #   languages: go, javascript, csharp, python, cpp, java, ruby
@@ -104,8 +104,8 @@ jobs:
       # If this step fails, then you should remove it and run the build manually (see below).
       - name: Autobuild
         if: "!(github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')"
-        uses: github/codeql-action/autobuild@c10b8064de6f491fea524254123dbe5e09572f13 # v3.29.5
+        uses: github/codeql-action/autobuild@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v3.29.5
 
       - name: Perform CodeQL Analysis
         if: "!(github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')"
-        uses: github/codeql-action/analyze@c10b8064de6f491fea524254123dbe5e09572f13 # v3.29.5
+        uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v3.29.5
