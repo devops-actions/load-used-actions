@@ -49,13 +49,48 @@ jobs:
           changed_files=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files --paginate --jq '.[].filename')
           echo "Changed files:"
           echo "$changed_files"
-          non_dep=$(echo "$changed_files" | grep -v -E '^(package\.json|package-lock\.json)$' || true)
+          non_dep=$(echo "$changed_files" | grep -v -E '^(package\.json|package-lock\.json|yarn\.lock|\.github/workflows/[^/]+\.ya?ml|\.github/dependabot\.yml)$' || true)
           if [ -n "$non_dep" ]; then
             echo "::error::Unexpected non-dependency files changed in Dependabot PR:"
             echo "$non_dep"
             exit 1
           fi
-          echo "✅ Only dependency files changed — CodeQL analysis not required"
+          echo "✅ Only dependency files changed"
+
+          # For workflow files: additionally verify every changed line is only a `uses:` action ref update.
+          # This prevents a compromised Dependabot PR from sneaking in extra content inside workflow files.
+          changed_workflows=$(echo "$changed_files" | grep -E '^\.github/workflows/[^/]+\.ya?ml$' || true)
+          if [ -n "$changed_workflows" ]; then
+            echo "Verifying workflow file changes are action-ref updates only..."
+            fail=false
+            while IFS= read -r wf_file; do
+              echo "  Inspecting: $wf_file"
+              patch=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" \
+                --paginate --jq ".[] | select(.filename == \"$wf_file\") | .patch // empty")
+              # Extract actual changed lines (+/-), skip file header lines (+++ / ---)
+              diff_lines=$(printf '%s\n' "$patch" | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' || true)
+              if [ -z "$diff_lines" ]; then
+                echo "    No content changes."
+                continue
+              fi
+              # Each changed line must be a `uses:` action reference (with optional SHA comment).
+              # Matches: `uses: owner/repo@ref`, `uses: owner/repo@sha # tag`, `uses: ./local-action`
+              bad=$(printf '%s\n' "$diff_lines" | \
+                grep -vE '^[+-]\s+(-\s+)?uses:\s+(\./[^ ]+|[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+)@[a-zA-Z0-9._/:-]+(\s+#.*)?$' || true)
+              if [ -n "$bad" ]; then
+                echo "::error::Non-action-ref changes detected in $wf_file — manual review required:"
+                printf '%s\n' "$bad"
+                fail=true
+              else
+                echo "    ✅ Only action refs updated in $wf_file"
+              fi
+            done <<< "$changed_workflows"
+            if [ "$fail" = "true" ]; then
+              exit 1
+            fi
+          fi
+
+          echo "✅ All dependency changes validated — CodeQL analysis not required"
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
