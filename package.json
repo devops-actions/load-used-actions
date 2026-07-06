@@ -12,7 +12,7 @@
   "dependencies": {
     "@actions/core": "^3.0.1",
     "@octokit/rest": "^22.0.1",
-    "js-yaml": "^5.2.0"
+    "js-yaml": "^5.2.1"
   },
   "overrides": {
     "undici": "^6.24.0"
