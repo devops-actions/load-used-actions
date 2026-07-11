@@ -30,12 +30,12 @@ jobs:
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       # For Dependabot PRs: validate that only dependency files changed and skip full analysis.
       # This satisfies the required CodeQL-Build status check without running a full scan,
@@ -49,18 +49,54 @@ jobs:
           changed_files=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files --paginate --jq '.[].filename')
           echo "Changed files:"
           echo "$changed_files"
-          non_dep=$(echo "$changed_files" | grep -v -E '^(package\.json|package-lock\.json)$' || true)
+          non_dep=$(echo "$changed_files" | grep -v -E '^(package\.json|package-lock\.json|yarn\.lock|\.github/workflows/[^/]+\.ya?ml|\.github/dependabot\.yml)$' || true)
           if [ -n "$non_dep" ]; then
             echo "::error::Unexpected non-dependency files changed in Dependabot PR:"
             echo "$non_dep"
             exit 1
           fi
-          echo "✅ Only dependency files changed — CodeQL analysis not required"
+          echo "✅ Only dependency files changed"
+
+          # For workflow files: additionally verify every changed line is only a `uses:` action ref update.
+          # This prevents a compromised Dependabot PR from sneaking in extra content inside workflow files.
+          changed_workflows=$(echo "$changed_files" | grep -E '^\.github/workflows/[^/]+\.ya?ml$' || true)
+          if [ -n "$changed_workflows" ]; then
+            echo "Verifying workflow file changes are action-ref updates only..."
+            fail=false
+            while IFS= read -r wf_file; do
+              echo "  Inspecting: $wf_file"
+              patch=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" \
+                --paginate --jq ".[] | select(.filename == \"$wf_file\") | .patch // empty")
+              # Extract actual changed lines (+/-), skip file header lines (+++ / ---)
+              diff_lines=$(printf '%s\n' "$patch" | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' || true)
+              if [ -z "$diff_lines" ]; then
+                echo "    No content changes."
+                continue
+              fi
+              # Each changed line must be a `uses:` action reference (with optional SHA comment).
+              # Matches: `uses: owner/repo@ref`, `uses: owner/repo@sha # tag`, `uses: ./local-action`,
+              # and subpath actions like `uses: owner/repo/subpath@ref` (e.g. github/codeql-action/autobuild).
+              bad=$(printf '%s\n' "$diff_lines" | \
+                grep -vE '^[+-]\s+(-\s+)?uses:\s+(\./[^ ]+|[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+(/[a-zA-Z0-9._-]+)*)@[a-zA-Z0-9._/:-]+(\s+#.*)?$' || true)
+              if [ -n "$bad" ]; then
+                echo "::error::Non-action-ref changes detected in $wf_file — manual review required:"
+                printf '%s\n' "$bad"
+                fail=true
+              else
+                echo "    ✅ Only action refs updated in $wf_file"
+              fi
+            done <<< "$changed_workflows"
+            if [ "$fail" = "true" ]; then
+              exit 1
+            fi
+          fi
+
+          echo "✅ All dependency changes validated — CodeQL analysis not required"
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         if: "!(github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')"
-        uses: github/codeql-action/init@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v3.29.5
+        uses: github/codeql-action/init@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v3.29.5
         # Override language selection by uncommenting this and choosing your languages
         # with:
         #   languages: go, javascript, csharp, python, cpp, java, ruby
@@ -69,8 +105,8 @@ jobs:
       # If this step fails, then you should remove it and run the build manually (see below).
       - name: Autobuild
         if: "!(github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')"
-        uses: github/codeql-action/autobuild@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v3.29.5
+        uses: github/codeql-action/autobuild@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v3.29.5
 
       - name: Perform CodeQL Analysis
         if: "!(github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')"
-        uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v3.29.5
+        uses: github/codeql-action/analyze@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v3.29.5
