@@ -74,9 +74,10 @@ jobs:
                 continue
               fi
               # Each changed line must be a `uses:` action reference (with optional SHA comment).
-              # Matches: `uses: owner/repo@ref`, `uses: owner/repo@sha # tag`, `uses: ./local-action`
+              # Matches: `uses: owner/repo@ref`, `uses: owner/repo@sha # tag`, `uses: ./local-action`,
+              # and subpath actions like `uses: owner/repo/subpath@ref` (e.g. github/codeql-action/autobuild).
               bad=$(printf '%s\n' "$diff_lines" | \
-                grep -vE '^[+-]\s+(-\s+)?uses:\s+(\./[^ ]+|[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+)@[a-zA-Z0-9._/:-]+(\s+#.*)?$' || true)
+                grep -vE '^[+-]\s+(-\s+)?uses:\s+(\./[^ ]+|[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+(/[a-zA-Z0-9._-]+)*)@[a-zA-Z0-9._/:-]+(\s+#.*)?$' || true)
               if [ -n "$bad" ]; then
                 echo "::error::Non-action-ref changes detected in $wf_file — manual review required:"
                 printf '%s\n' "$bad"
