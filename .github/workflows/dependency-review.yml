@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   dependency-review:
-    uses: devops-actions/.github/.github/workflows/dependency-review.yml@5e1e286077541a5a9a984dbd52df15ba382ca025 # main
+    uses: devops-actions/.github/.github/workflows/dependency-review.yml@d364c735203f99cf570835e235fc73e82cd170a5 # main
     permissions:
       contents: read
       pull-requests: write
