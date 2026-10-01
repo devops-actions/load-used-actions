@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
@@ -58,13 +58,13 @@ jobs:
     steps:
       
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
       - name: Get tag value
         id: tag
-        uses: devops-actions/action-get-tag@d1a9f29c7ede1bde1b08f160299bef0d95a0b68f # v1.0.4
+        uses: devops-actions/action-get-tag@1367554e3eb236390e2f8ad7219d9bf2b9f0b948 # v1.0.4
         
       - name: Use tag
         run: echo ${{ steps.tag.outputs.tag }}
