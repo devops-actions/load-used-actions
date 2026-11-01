@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   analysis:
-    uses: devops-actions/.github/.github/workflows/rw-ossf-scorecard.yml@672aa7567d97943087954938e9fdce6658f36917 # main
+    uses: devops-actions/.github/.github/workflows/rw-ossf-scorecard.yml@4b37bf2261e6208f77520bc3719a8f8b9653e551 # main
     permissions:
       # Needed to upload the results to code-scanning dashboard.
       security-events: write
