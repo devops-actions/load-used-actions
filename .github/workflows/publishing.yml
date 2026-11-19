@@ -48,44 +48,15 @@ jobs:
           name: actions
           path: |
             actions.json
-            ${{ steps.load-actions.outputs.actions-file }}            
-    
-  publish:
+            ${{ steps.load-actions.outputs.actions-file }}
+
+  release:
+    name: Release with SBOM and attestations
     needs: test-local-action
-    runs-on: ubuntu-latest
+    # Creates the GitHub release for this tag with the action files, a source archive and
+    # SPDX/CycloneDX SBOMs attached, each with a verified artifact attestation.
     permissions:
-      contents: write
-    steps:
-      
-      - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
-        with:
-          egress-policy: audit
-
-      - name: Get tag value
-        id: tag
-        uses: devops-actions/action-get-tag@0b6f974a480221bd60c9341b6ac4d54b851a1307 # v1.0.4
-        
-      - name: Use tag
-        run: echo ${{ steps.tag.outputs.tag }}
-
-      - uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-          body: |
-            Release ${{ github.ref }} is available now
-
-      # todo: figure out how this works with an action :-)
-      # does not work, as you cannot set the flag to publish the action to the marketplace
-      #- uses: actions/publish-release-asset@v2
-        #with:
-          #upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          #asset_path: ./my-artifact.zip
-          #asset_name: my-artifact.zip
-          #asset_content_type: application/zip
+      contents: write       # create the release and upload its assets
+      id-token: write       # Sigstore keyless signing for the attestations
+      attestations: write   # store the attestations
+    uses: devops-actions/.github/.github/workflows/rw-release-attestation.yml@b88953c2b5ba6cfc3048a7fb6d32dc78e1588c58 # main
