@@ -14,16 +14,6 @@ updates:
     schedule:
       interval: monthly
 
-  # Enable version updates for actions
-  - package-ecosystem: 'github-actions'
-    directory: '.github/workflows/'
-    schedule:
-      interval: monthly
-    groups:
-      github-actions:
-        patterns:
-          - "*"
-
   - package-ecosystem: github-actions
     directory: /
     schedule:
